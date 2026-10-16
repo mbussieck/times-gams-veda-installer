@@ -53,13 +53,31 @@ jobs:
           $gamspy = Join-Path (Split-Path $env:PYTHON) "Scripts\gamspy.exe"
           & $gamspy install solver --install-all-solvers
 
+      - name: Download Veda
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # .veda-version holds an exact version (e.g. 5.0.0.0) or "latest"
+          $version = (Get-Content .veda-version -First 1).Trim()
+          $repo = "kanors-emr/Veda2.0-Installation"
+          if ($version -eq "latest") {
+            $version = (gh release view --repo $repo --json tagName --jq .tagName).TrimStart("v")
+          }
+          Write-Host "Downloading Veda $version"
+          gh release download "v$version" --repo $repo --pattern "Veda2.0_localhost_$version.zip" --dir build
+          if ($LASTEXITCODE -ne 0) { throw "Could not download Veda $version" }
+          # The zip contains a top-level Veda folder, so this creates build\Veda
+          Expand-Archive "build\Veda2.0_localhost_$version.zip" build
+          "VEDA_VERSION=$version" >> $env:GITHUB_ENV
+
       - name: Build installer
         shell: pwsh
         run: |
           # Inno Setup is preinstalled on the Windows runner images
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { throw "Inno Setup not found at $iscc" }
-          & $iscc "/O$env:GITHUB_WORKSPACE\build\installer" installer\vedapy.iss
+          & $iscc "/O$env:GITHUB_WORKSPACE\build\installer" "/DVedaVersion=$env:VEDA_VERSION" installer\vedapy.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
 
       - name: Upload installer

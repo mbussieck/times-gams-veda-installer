@@ -11,6 +11,11 @@
 #define UnInstInfo="{app}\.uninstinfo.ini"
 ; GAMS system that comes with GAMSPy in the bundled Python (build\python from the pipeline)
 #define GamsSysDir="{app}\python\Lib\site-packages\gamspy_base"
+; Veda version, passed by the pipeline from .veda-version (ISCC /DVedaVersion=5.0.0.0)
+#ifndef VedaVersion
+  #error VedaVersion is not defined. Pass it to the compiler with /DVedaVersion=<version>.
+#endif
+#define VedaDir="{app}\Veda\Veda2.0_localhost_" + VedaVersion
 
 [Setup]
 ArchitecturesAllowed=x64compatible
@@ -57,25 +62,10 @@ DisableProgramGroupPage=yes
 
 [Files]
 Source: ..\build\python\*; DestDir: {app}\python; Flags: ignoreversion recursesubdirs createallsubdirs
+; createallsubdirs also creates the empty folders from the Veda zip. Without them, PostgreSQL
+; fails to start and Veda cannot connect to it.
+Source: ..\build\Veda\*; DestDir: {app}\Veda; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-
-; NOTE: [Files] does not create empty directories. Without these, PostgreSQL fails
-; to start and Veda cannot connect to it.
-[Dirs]
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_commit_ts"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_dynshmem"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_logical\mappings"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_logical\snapshots"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_notify"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_replslot"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_serial"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_snapshots"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_stat_tmp"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_tblspc"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_twophase"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\data\pg_wal\archive_status"
-Name: "{app}\Veda\Veda2.0_localhost_4.4.0.0\pgsql\lib\pkgconfig"
-Name: "{app}\Veda\GAMS_WrkTIMES"
 
 [Icons]
 ; NOTE: The following entry contains an English phrase ("Uninstall"). You are free to translate it into another language if required.
@@ -83,7 +73,7 @@ Name: {group}\Uninstall {#MyAppId}; Filename: {uninstallexe}
 
 [Run]
 ; NOTE: The following entry contains an English phrase ("Launch"). You are free to translate it into another language if required.
-Filename: {app}\Veda\Veda2.0_localhost_4.4.0.0\Veda2.0.exe; Description: Launch Veda2.0; Flags: nowait postinstall skipifsilent
+Filename: {#VedaDir}\Veda2.0.exe; Description: Launch Veda2.0; Flags: nowait postinstall skipifsilent
 
 [Code]
 
@@ -205,7 +195,7 @@ var
 begin
 Link := ExpandConstant('{userdesktop}\Veda2.0.lnk')
 CreateShellLink(Link, '',
-                ExpandConstant('{app}\Veda\Veda2.0_localhost_4.4.0.0\Veda2.0.exe'), '', '', ExpandConstant('{app}\Veda\Veda2.0_localhost_4.4.0.0\Veda2.0.exe'), 0, SW_SHOWNORMAL);
+                ExpandConstant('{#VedaDir}\Veda2.0.exe'), '', '', ExpandConstant('{#VedaDir}\Veda2.0.exe'), 0, SW_SHOWNORMAL);
 SetIniString('file', 'shortcut_veda', Link, ExpandConstant('{#UnInstInfo}'));
 end;
 
