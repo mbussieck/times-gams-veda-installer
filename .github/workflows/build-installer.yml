@@ -20,6 +20,9 @@ jobs:
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v10.3.0
+        with:
+          # Every installer build starts from scratch
+          enable-cache: false
 
       - name: Install Python
         shell: pwsh
@@ -29,6 +32,8 @@ jobs:
           $python = uv python find --managed-python
           # Copy to a version-independent folder that the installer script expects
           Copy-Item (Split-Path $python) build\python -Recurse
+          # The copy is no longer managed by uv; this marker would block installing packages into it
+          Remove-Item build\python\Lib\EXTERNALLY-MANAGED
           $python = (Resolve-Path build\python\python.exe).Path
           Write-Host "Using $python"
           "PYTHON=$python" >> $env:GITHUB_ENV
