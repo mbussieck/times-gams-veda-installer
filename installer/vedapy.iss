@@ -43,10 +43,10 @@ VersionInfoDescription={#MyAppName} installer
 AlwaysUsePersonalGroup=no
 DiskSpanning=false
 OutputDir=.
-SetupIconFile=vedapy.ico
+SetupIconFile=assets\vedapy.ico
 
-WizardImageFile = vedapy_left.bmp
-WizardSmallImageFile = vedapy_small.bmp
+WizardImageFile = assets\vedapy_left.bmp
+WizardSmallImageFile = assets\vedapy_small.bmp
 WizardSizePercent = 130
 
 DisableWelcomePage=no
