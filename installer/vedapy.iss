@@ -56,7 +56,6 @@ DisableDirPage=no
 DisableProgramGroupPage=yes
 
 [Files]
-Source: innofiles\*.*; DestDir: {app}; Flags: ignoreversion recursesubdirs
 Source: ..\build\python\*; DestDir: {app}\python; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
