@@ -9,6 +9,8 @@
 #define MyAppVersion="21.9.1";
 #define MyDirVersion="22.0";
 #define UnInstInfo="{app}\.uninstinfo.ini"
+; GAMS system that comes with GAMSPy in the bundled Python (build\python from the pipeline)
+#define GamsSysDir="{app}\python\Lib\site-packages\gamspy_base"
 
 [Setup]
 ArchitecturesAllowed=x64compatible
@@ -55,6 +57,7 @@ DisableProgramGroupPage=yes
 
 [Files]
 Source: innofiles\*.*; DestDir: {app}; Flags: ignoreversion recursesubdirs
+Source: ..\build\python\*; DestDir: {app}\python; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 ; NOTE: [Files] does not create empty directories. Without these, PostgreSQL fails
@@ -215,7 +218,7 @@ var
 begin
    Hive := HKLM
    SubKey := 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
-   RegWriteStringValue(Hive, SubKey, 'GAMSDIR', ExpandConstant('{app}'));
+   RegWriteStringValue(Hive, SubKey, 'GAMSDIR', ExpandConstant('{#GamsSysDir}'));
    if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then    RegWriteExpandStringValue(Hive, SubKey, 'Path', '%GAMSDIR%;')
    else if Pos('%GAMSDIR%', PathStr) = 0 then RegWriteStringValue(Hive, SubKey, 'Path', '%GAMSDIR%;' + PathStr);
 
@@ -232,7 +235,7 @@ var
 begin
    Hive := HKLM
    SubKey := 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
-   if RegQueryStringValue(Hive, SubKey, 'GAMSDIR', GamsDir) and (GamsDir = ExpandConstant('{app}')) then
+   if RegQueryStringValue(Hive, SubKey, 'GAMSDIR', GamsDir) and (GamsDir = ExpandConstant('{#GamsSysDir}')) then
    begin
       RegDeleteValue(Hive, SubKey, 'GAMSDIR');
       if RegQueryStringValue(Hive, SubKey, 'Path', PathStr) and (StringChangeEx(PathStr, '%GAMSDIR%;', '', True) > 0) then
@@ -253,7 +256,7 @@ begin
   ALPSuccess := False;
   ALPLicenseFile := ExpandConstant('{app}\_alp_license_tmp.txt');
   ALPLogFile := ExpandConstant('{app}\_gams_get_key_log.txt');
-  ArgString := ExpandConstant('/C ""{app}\gamsgetkey.exe" ') + TE_AccessCode.Text + ' -o ' + ALPLicenseFile;
+  ArgString := ExpandConstant('/C ""{#GamsSysDir}\gamsgetkey.exe" ') + TE_AccessCode.Text + ' -o ' + ALPLicenseFile;
   if (IsOnPrem) then
   begin
     ArgString := ArgString + ' -s ' + Trim(TE_Server.Text);
@@ -398,13 +401,14 @@ begin
   
   if wpGamsLicense = CurPage then
   begin
-    TE_Certificate.Text := ExpandConstant('{app}\gamslice.crt');
+    TE_Certificate.Text := ExpandConstant('{#GamsSysDir}\gamslice.crt');
     UpdateLicenseSelection();
   end;
 
   if wpFinished = CurPage then
   begin
-    LicenseTargetFile := ExpandConstant('{app}\gamslice.txt');
+    // Replaces the demo license that ships with gamspy_base
+    LicenseTargetFile := ExpandConstant('{#GamsSysDir}\gamslice.txt');
     HandleLicenseOptions();
     UpdatePath();
     CreateShortcutVeda();

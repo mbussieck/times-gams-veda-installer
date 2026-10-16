@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 env:
-  # Standalone Python that will be bundled into the installer
-  UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}\build\python
+  # uv downloads Python here; it is then copied to build\python for bundling
+  UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}\build\uv-python
 
 jobs:
   build-installer:
@@ -27,6 +27,9 @@ jobs:
         run: |
           uv python install
           $python = uv python find --managed-python
+          # Copy to a version-independent folder that the installer script expects
+          Copy-Item (Split-Path $python) build\python -Recurse
+          $python = (Resolve-Path build\python\python.exe).Path
           Write-Host "Using $python"
           "PYTHON=$python" >> $env:GITHUB_ENV
 
