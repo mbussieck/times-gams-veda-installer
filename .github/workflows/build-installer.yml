@@ -6,6 +6,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # Standalone Python that will be bundled into the installer
+  UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}\build\python
+
 jobs:
   build-installer:
     runs-on: windows-latest
@@ -13,3 +17,30 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10
+
+      - name: Install Python
+        shell: pwsh
+        # uv picks the Python version from .python-version (e.g. 3.14 -> latest 3.14.x)
+        run: |
+          uv python install
+          $python = uv python find --managed-python
+          Write-Host "Using $python"
+          "PYTHON=$python" >> $env:GITHUB_ENV
+
+      - name: Install GAMSPy
+        shell: pwsh
+        run: |
+          # .gamspy-version holds an exact version (e.g. 1.18.0) or "latest"
+          $version = (Get-Content .gamspy-version -First 1).Trim()
+          $package = "gamspy"
+          if ($version -ne "latest") { $package = "$package==$version" }
+          uv pip install --python $env:PYTHON --upgrade $package
+
+      - name: Install all GAMSPy solvers
+        shell: pwsh
+        run: |
+          $gamspy = Join-Path (Split-Path $env:PYTHON) "Scripts\gamspy.exe"
+          & $gamspy install solver --install-all-solvers
