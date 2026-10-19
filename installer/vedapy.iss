@@ -11,6 +11,9 @@
 #define UnInstInfo="{app}\.uninstinfo.ini"
 ; GAMS system that comes with GAMSPy in the bundled Python (build\python from the pipeline)
 #define GamsSysDir="{app}\python\Lib\site-packages\gamspy_base"
+; Environment variable that points to GamsSysDir and is added to PATH.
+; Not GAMSDIR, which belongs to regular GAMS installations.
+#define GamsDirVar="VEDAPY_GAMSDIR"
 ; Veda version, passed by the pipeline from .veda-version (ISCC /DVedaVersion=5.0.0.0)
 #ifndef VedaVersion
   #error VedaVersion is not defined. Pass it to the compiler with /DVedaVersion=<version>.
@@ -27,7 +30,7 @@ AppVerName={#MyAppName} {#MyAppVersion}
 ChangesEnvironment=yes
 DefaultDirName={code:GetDefaultDir}
 DefaultGroupName={#MyAppId}
-; Admin rights are needed because UpdatePath writes GAMSDIR and PATH to the system environment (HKLM).
+; Admin rights are needed because UpdatePath writes VEDAPY_GAMSDIR and PATH to the system environment (HKLM).
 ; TODO: Decide whether non-admin users must be able to install. If so, add a per-user mode that
 ; writes to HKCU\Environment and uses a user-writable default folder (PrivilegesRequiredOverridesAllowed=dialog).
 PrivilegesRequired=admin
@@ -202,7 +205,7 @@ CreateShellLink(Link, '',
 SetIniString('file', 'shortcut_veda', Link, ExpandConstant('{#UnInstInfo}'));
 end;
 
-{Update the system PATH variable and a system GAMSDIR variable.}
+{Update the system PATH variable and a system {#GamsDirVar} variable.}
 procedure UpdatePath();
 var
     Hive: Integer;
@@ -210,16 +213,16 @@ var
 begin
    Hive := HKLM
    SubKey := 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
-   RegWriteStringValue(Hive, SubKey, 'GAMSDIR', ExpandConstant('{#GamsSysDir}'));
-   if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then    RegWriteExpandStringValue(Hive, SubKey, 'Path', '%GAMSDIR%;')
-   else if Pos('%GAMSDIR%', PathStr) = 0 then RegWriteStringValue(Hive, SubKey, 'Path', '%GAMSDIR%;' + PathStr);
+   RegWriteStringValue(Hive, SubKey, '{#GamsDirVar}', ExpandConstant('{#GamsSysDir}'));
+   if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then    RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;')
+   else if Pos('%{#GamsDirVar}%', PathStr) = 0 then RegWriteStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;' + PathStr);
 
-   // show a warning, that the System GAMSDIR will have a higher precedence
-   if RegValueExists(HKCU, 'Environment', 'GAMSDIR')
-   then MsgBox('A GAMSDIR user environment variable is present from a previous installation. When using the PATH variable, user GAMSDIR will take precedence over system GAMSDIR.', mbInformation, MB_OK)
+   // show a warning, that the System {#GamsDirVar} will have a higher precedence
+   if RegValueExists(HKCU, 'Environment', '{#GamsDirVar}')
+   then MsgBox('A {#GamsDirVar} user environment variable is present from a previous installation. When using the PATH variable, user {#GamsDirVar} will take precedence over system {#GamsDirVar}.', mbInformation, MB_OK)
 end;
 
-{Undo UpdatePath, but only if GAMSDIR still points to this installation.}
+{Undo UpdatePath, but only if {#GamsDirVar} still points to this installation.}
 procedure RemovePath();
 var
     Hive: Integer;
@@ -227,10 +230,10 @@ var
 begin
    Hive := HKLM
    SubKey := 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
-   if RegQueryStringValue(Hive, SubKey, 'GAMSDIR', GamsDir) and (GamsDir = ExpandConstant('{#GamsSysDir}')) then
+   if RegQueryStringValue(Hive, SubKey, '{#GamsDirVar}', GamsDir) and (GamsDir = ExpandConstant('{#GamsSysDir}')) then
    begin
-      RegDeleteValue(Hive, SubKey, 'GAMSDIR');
-      if RegQueryStringValue(Hive, SubKey, 'Path', PathStr) and (StringChangeEx(PathStr, '%GAMSDIR%;', '', True) > 0) then
+      RegDeleteValue(Hive, SubKey, '{#GamsDirVar}');
+      if RegQueryStringValue(Hive, SubKey, 'Path', PathStr) and (StringChangeEx(PathStr, '%{#GamsDirVar}%;', '', True) > 0) then
          RegWriteStringValue(Hive, SubKey, 'Path', PathStr);
    end;
 end;
@@ -512,7 +515,7 @@ begin
    then
    begin
       Default := ''
-      // TODO: Call RemovePath() to undo the PATH and GAMSDIR changes on uninstall
+      // TODO: Call RemovePath() to undo the PATH and VEDAPY_GAMSDIR changes on uninstall
       //delete shortcuts
       DeleteFile(GetIniString('file', 'shortcut_veda', Default, ExpandConstant('{#UnInstInfo}')));
       //delete .uninstinfo.ini
