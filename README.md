@@ -83,6 +83,6 @@ During installation it:
 
 - Asks for a GAMS access code and retrieves a license with `gamsgetkey`. The license is written to `gamspy_base\gamslice.txt` and replaces the demo license that ships with GAMSPy.
 - Sets the system environment variable `VEDAPY_GAMSDIR` to the `gamspy_base` folder. It also adds `%VEDAPY_GAMSDIR%` to the front of the system `PATH`. VedaPy uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.
-- Creates a **Veda2.0** desktop shortcut and offers to launch Veda when setup finishes.
+- Creates a **Veda2.0** shortcut on the Public desktop, visible to all users, and offers to launch Veda when setup finishes.
 
 The uninstaller removes the installed files and the desktop shortcut. It currently leaves `VEDAPY_GAMSDIR` and the `PATH` entry in place.

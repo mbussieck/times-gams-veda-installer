@@ -12,7 +12,6 @@
 #endif
 ; Major version for the default install folder, e.g. 54 for 54.6.0
 #define MyDirVersion=Copy(MyAppVersion, 1, Pos(".", MyAppVersion) - 1)
-#define UnInstInfo="{app}\.uninstinfo.ini"
 ; GAMS system that comes with GAMSPy in the bundled Python (build\python from the pipeline)
 #define GamsSysDir="{app}\python\Lib\site-packages\gamspy_base"
 ; Environment variable that points to GamsSysDir and is added to PATH.
@@ -80,6 +79,8 @@ Source: ..\build\Veda\*; DestDir: {app}\Veda; Flags: ignoreversion recursesubdir
 [Icons]
 ; NOTE: The following entry contains an English phrase ("Uninstall"). You are free to translate it into another language if required.
 Name: {group}\Uninstall {#MyAppId}; Filename: {uninstallexe}
+; {autodesktop} is the Public desktop in admin mode, so every user sees the shortcut
+Name: {autodesktop}\Veda2.0; Filename: {#VedaDir}\Veda2.0.exe
 
 [Run]
 ; NOTE: The following entry contains an English phrase ("Launch"). You are free to translate it into another language if required.
@@ -196,17 +197,6 @@ begin
 
   ST_License.Caption := LicenseStr;
   ST_License.Font.Height := ScaleY(13);
-end;
-
-{Creates a shortcut for Veda and write this to .uninstinfo.ini}
-procedure CreateShortcutVeda;
-var
-   Link: string;
-begin
-Link := ExpandConstant('{userdesktop}\Veda2.0.lnk')
-CreateShellLink(Link, '',
-                ExpandConstant('{#VedaDir}\Veda2.0.exe'), '', '', ExpandConstant('{#VedaDir}\Veda2.0.exe'), 0, SW_SHOWNORMAL);
-SetIniString('file', 'shortcut_veda', Link, ExpandConstant('{#UnInstInfo}'));
 end;
 
 {Update the system PATH variable and a system {#GamsDirVar} variable.}
@@ -410,7 +400,6 @@ begin
     LicenseTargetFile := ExpandConstant('{#GamsSysDir}\gamslice.txt');
     HandleLicenseOptions();
     UpdatePath();
-    CreateShortcutVeda();
   end;
 end;
 
@@ -512,18 +501,11 @@ end;
 
 {called when a wizard page changes during uninstallation}
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
-var
-   Default: String;
 begin
    if usUninstall = CurUninstallStep
    then
    begin
-      Default := ''
       // TODO: Call RemovePath() to undo the PATH and VEDAPY_GAMSDIR changes on uninstall
-      //delete shortcuts
-      DeleteFile(GetIniString('file', 'shortcut_veda', Default, ExpandConstant('{#UnInstInfo}')));
-      //delete .uninstinfo.ini
-      DeleteFile(ExpandConstant('{#UnInstInfo}'));
    end;
 end;
 
