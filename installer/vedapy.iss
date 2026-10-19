@@ -27,6 +27,9 @@ AppVerName={#MyAppName} {#MyAppVersion}
 ChangesEnvironment=yes
 DefaultDirName={code:GetDefaultDir}
 DefaultGroupName={#MyAppId}
+; Admin rights are needed because UpdatePath writes GAMSDIR and PATH to the system environment (HKLM).
+; TODO: Decide whether non-admin users must be able to install. If so, add a per-user mode that
+; writes to HKCU\Environment and uses a user-writable default folder (PrivilegesRequiredOverridesAllowed=dialog).
 PrivilegesRequired=admin
 OutputBaseFilename={#MyAppId}-setup
 
