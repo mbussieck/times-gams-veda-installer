@@ -5,9 +5,13 @@
 ; Used for the AppId, Start menu group and file names, where "/" is not allowed.
 ; Never change it after the first release, or upgrades will install side by side.
 #define MyAppId="VedaPy"
-; TODO: Define the VedaPy version scheme. These are still the old GAMS release numbers.
-#define MyAppVersion="21.9.1";
-#define MyDirVersion="22.0";
+; The VedaPy version is the GAMS version that comes with gamspy_base,
+; passed by the pipeline (ISCC /DMyAppVersion=54.6.0)
+#ifndef MyAppVersion
+  #error MyAppVersion is not defined. Pass it to the compiler with /DMyAppVersion=<GAMS version>.
+#endif
+; Major version for the default install folder, e.g. 54 for 54.6.0
+#define MyDirVersion=Copy(MyAppVersion, 1, Pos(".", MyAppVersion) - 1)
 #define UnInstInfo="{app}\.uninstinfo.ini"
 ; GAMS system that comes with GAMSPy in the bundled Python (build\python from the pipeline)
 #define GamsSysDir="{app}\python\Lib\site-packages\gamspy_base"
@@ -434,8 +438,8 @@ begin
       if dirRes = IDNO then
         Result := False;
     end;
-    // TODO: This compares a GAMS system in the target folder against MyAppVersion,
-    // which is no longer a GAMS version. Decide whether this check is still needed.
+    // TODO: This looks for a GAMS system (gamsstmp.txt) directly in the target folder, but the
+    // GAMS system is now in gamspy_base, which has no gamsstmp.txt. Decide whether this check is still needed.
     if Result and DirExists(ExpandConstant('{app}')) then
     begin
       oldGamsVersion := GetGamsDirVersion(ExpandConstant('{app}'));

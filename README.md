@@ -47,7 +47,7 @@ The workflow runs on GitHub's hosted `windows-latest` runner and performs these 
 1. Installs the Python version from `.python-version` with uv and copies it to `build\python`.
 2. Installs GAMSPy into that Python and runs `gamspy install solver --install-all-solvers`.
 3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`.
-4. Compiles `installer\vedapy.iss` with the preinstalled Inno Setup. It passes the resolved Veda version as `/DVedaVersion=<version>`.
+4. Compiles `installer\vedapy.iss` with the preinstalled Inno Setup. It passes the GAMS version of `gamspy_base` as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.
 5. Uploads `build\installer\VedaPy-setup.exe` as an artifact.
 
 ### Building locally
@@ -59,17 +59,17 @@ build\python\   standalone Python with GAMSPy and solvers installed
 build\Veda\     extracted Veda zip
 ```
 
-Then compile, passing the Veda version that matches `build\Veda`:
+Then compile, passing the GAMS version of `gamspy_base` in `build\python` and the Veda version of `build\Veda`:
 
 ```
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DVedaVersion=5.0.0.0 installer\vedapy.iss
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=54.6.0 /DVedaVersion=5.0.0.0 installer\vedapy.iss
 ```
 
-The script refuses to compile without `/DVedaVersion`.
+The script refuses to compile without these two values.
 
 ## What the installer does
 
-The installer requires administrator rights. The default target folder is `C:\GAMS_TIMES_Veda\<version>`.
+The installer's version is the GAMS version that comes with `gamspy_base`, for example `54.6.0`. The installer requires administrator rights. The default target folder is `C:\GAMS_TIMES_Veda\<GAMS major version>`, for example `C:\GAMS_TIMES_Veda\54`.
 
 Installed layout:
 
