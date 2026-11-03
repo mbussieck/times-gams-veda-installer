@@ -4,10 +4,10 @@
 ; and the installer file name, so it must be valid in file names.
 ; Never change it after the first release, or upgrades will install side by side.
 #define MyAppName="TIMES_GAMS_Veda"
-; The product version is the GAMS version that comes with gamspy_base,
-; passed by the pipeline (ISCC /DMyAppVersion=54.6.0)
+; The product version is the TIMES version that comes with Veda,
+; passed by the pipeline (ISCC /DMyAppVersion=4.9.7)
 #ifndef MyAppVersion
-  #error MyAppVersion is not defined. Pass it to the compiler with /DMyAppVersion=<GAMS version>.
+  #error MyAppVersion is not defined. Pass it to the compiler with /DMyAppVersion=<TIMES version>.
 #endif
 ; GAMS system that comes with GAMSPy in the bundled Python (build\python from the pipeline)
 #define GamsSysDir="{app}\python\Lib\site-packages\gamspy_base"

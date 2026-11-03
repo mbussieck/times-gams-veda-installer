@@ -46,8 +46,8 @@ The workflow runs on GitHub's hosted `windows-latest` runner and performs these 
 
 1. Installs the Python version from `.python-version` with uv and copies it to `build\python`.
 2. Installs GAMSPy into that Python and runs `gamspy install solver --install-all-solvers`.
-3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`.
-4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the GAMS version of `gamspy_base` as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.
+3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`. It reads the TIMES version from `initsys.mod` in the `GAMS_SrcTIMES.<version>` folder of the zip.
+4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the TIMES version as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.
 5. Uploads `build\installer\TIMES_GAMS_Veda-setup.exe` as an artifact.
 
 ### Building locally
@@ -59,17 +59,17 @@ build\python\   standalone Python with GAMSPy and solvers installed
 build\Veda\     extracted Veda zip
 ```
 
-Then compile, passing the GAMS version of `gamspy_base` in `build\python` and the Veda version of `build\Veda`:
+Then compile, passing the TIMES version of `build\Veda\GAMS_SrcTIMES.<version>` and the Veda version of `build\Veda`:
 
 ```
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=54.6.0 /DVedaVersion=5.0.0.0 installer\TIMES_GAMS_Veda.iss
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=4.9.7 /DVedaVersion=5.0.0.0 installer\TIMES_GAMS_Veda.iss
 ```
 
 The script refuses to compile without these two values.
 
 ## What the installer does
 
-The installer's version is the GAMS version that comes with `gamspy_base`, for example `54.6.0`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES_GAMS_Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time.
+The installer's version is the TIMES version that comes with Veda, for example `4.9.7`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES_GAMS_Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time.
 
 Installed layout:
 
