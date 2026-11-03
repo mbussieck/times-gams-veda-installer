@@ -69,7 +69,7 @@ The script refuses to compile without these two values.
 
 ## What the installer does
 
-The installer's version is the GAMS version that comes with `gamspy_base`, for example `54.6.0`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`.
+The installer's version is the GAMS version that comes with `gamspy_base`, for example `54.6.0`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES_GAMS_Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time.
 
 Installed layout:
 

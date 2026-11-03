@@ -46,7 +46,9 @@ AppId={#MyAppName}
 ShowTasksTreeLines=true
 AppVersion={#MyAppVersion}
 AllowRootDirectory=true
-UsePreviousAppDir=false
+; Together with DisableDirPage=auto: an upgrade always goes into the folder of the previous
+; installation (found via AppId), so two versions cannot be installed side by side
+UsePreviousAppDir=yes
 InternalCompressLevel=ultra
 ; TODO: Add VersionInfoCompany
 VersionInfoTextVersion={#MyAppVersion}
@@ -62,7 +64,8 @@ WizardSmallImageFile = assets\vedapy_small.bmp
 WizardSizePercent = 130
 
 DisableWelcomePage=no
-DisableDirPage=no
+; Skip the folder selection if a previous installation was found (see UsePreviousAppDir)
+DisableDirPage=auto
 DisableProgramGroupPage=yes
 
 [Files]
