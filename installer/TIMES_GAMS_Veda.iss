@@ -4,6 +4,9 @@
 ; and the installer file name, so it must be valid in file names.
 ; Never change it after the first release, or upgrades will install side by side.
 #define MyAppName="TIMES_GAMS_Veda"
+; Product name shown in the wizard texts, the window title and Apps & features.
+; Not valid in file names, so MyAppName is used for those.
+#define MyAppDisplayName="TIMES/GAMS/Veda"
 ; The product version is the TIMES version that comes with Veda,
 ; passed by the pipeline (ISCC /DMyAppVersion=4.9.7)
 #ifndef MyAppVersion
@@ -23,9 +26,9 @@
 [Setup]
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-AppName={#MyAppName}
+AppName={#MyAppDisplayName}
 ; TODO: List the bundled component versions (GAMSPy, TIMES, Veda) or drop them
-AppVerName={#MyAppName} {#MyAppVersion}
+AppVerName={#MyAppDisplayName} {#MyAppVersion}
 ; TODO: Add AppPublisher, AppPublisherURL, AppSupportURL and AppUpdatesURL
 ChangesEnvironment=yes
 DefaultDirName=C:\{#MyAppName}
@@ -53,7 +56,7 @@ InternalCompressLevel=ultra
 ; TODO: Add VersionInfoCompany
 VersionInfoTextVersion={#MyAppVersion}
 VersionInfoVersion={#MyAppVersion}
-VersionInfoDescription={#MyAppName} installer
+VersionInfoDescription={#MyAppDisplayName} installer
 AlwaysUsePersonalGroup=no
 DiskSpanning=false
 OutputDir=.
