@@ -69,7 +69,7 @@ The script refuses to compile without these two values.
 
 ## What the installer does
 
-The installer's version is the GAMS version that comes with `gamspy_base`, for example `54.6.0`. The installer requires administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`.
+The installer's version is the GAMS version that comes with `gamspy_base`, for example `54.6.0`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`.
 
 Installed layout:
 
@@ -82,7 +82,7 @@ Installed layout:
 During installation it:
 
 - Asks for a GAMS access code and retrieves a license with `gamsgetkey`. The license is written to `gamspy_base\gamslice.txt` and replaces the demo license that ships with GAMSPy.
-- Sets the system environment variable `VEDAPY_GAMSDIR` to the `gamspy_base` folder. It also adds `%VEDAPY_GAMSDIR%` to the front of the system `PATH`. VedaPy uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.
-- Creates a **Veda2.0** shortcut on the Public desktop, visible to all users, and offers to launch Veda when setup finishes.
+- Sets the user environment variable `VEDAPY_GAMSDIR` to the `gamspy_base` folder. It also adds `%VEDAPY_GAMSDIR%` to the front of the user `PATH`. Windows appends the user `PATH` to the system `PATH`, so a GAMS on the system `PATH` takes precedence. VedaPy uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.
+- Creates a **Veda2.0** shortcut on the desktop of the current user and offers to launch Veda when setup finishes.
 
 The uninstaller removes the installed files and the desktop shortcut. It currently leaves `VEDAPY_GAMSDIR` and the `PATH` entry in place.

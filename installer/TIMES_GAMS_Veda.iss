@@ -30,10 +30,9 @@ AppVerName={#MyAppName} {#MyAppVersion}
 ChangesEnvironment=yes
 DefaultDirName=C:\{#MyAppName}
 DefaultGroupName={#MyAppName}
-; Admin rights are needed because UpdatePath writes VEDAPY_GAMSDIR and PATH to the system environment (HKLM).
-; TODO: Decide whether non-admin users must be able to install. If so, add a per-user mode that
-; writes to HKCU\Environment and uses a user-writable default folder (PrivilegesRequiredOverridesAllowed=dialog).
-PrivilegesRequired=admin
+; Installs for the current user only, without admin rights. UpdatePath writes VEDAPY_GAMSDIR
+; and PATH to the user environment (HKCU), and shortcuts and the uninstall entry are per user.
+PrivilegesRequired=lowest
 OutputBaseFilename={#MyAppName}-setup
 
 UsePreviousLanguage=no
@@ -76,7 +75,7 @@ Source: ..\build\Veda\*; DestDir: {app}\Veda; Flags: ignoreversion recursesubdir
 [Icons]
 ; NOTE: The following entry contains an English phrase ("Uninstall"). You are free to translate it into another language if required.
 Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}
-; {autodesktop} is the Public desktop in admin mode, so every user sees the shortcut
+; {autodesktop} is the desktop of the current user in non-admin mode
 Name: {autodesktop}\Veda2.0; Filename: {#VedaDir}\Veda2.0.exe
 
 [Run]
@@ -190,21 +189,23 @@ begin
   ST_License.Font.Height := ScaleY(13);
 end;
 
-{Update the system PATH variable and a system {#GamsDirVar} variable.}
+{Update the user PATH variable and a user {#GamsDirVar} variable.}
 procedure UpdatePath();
 var
     Hive: Integer;
     SubKey, PathStr: String;
 begin
-   Hive := HKLM
-   SubKey := 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+   Hive := HKCU
+   SubKey := 'Environment'
    RegWriteStringValue(Hive, SubKey, '{#GamsDirVar}', ExpandConstant('{#GamsSysDir}'));
+   // Always write Path as REG_EXPAND_SZ, otherwise %{#GamsDirVar}% is not expanded.
+   // The user Path can be REG_SZ, unlike the system Path.
    if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then    RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;')
-   else if Pos('%{#GamsDirVar}%', PathStr) = 0 then RegWriteStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;' + PathStr);
+   else if Pos('%{#GamsDirVar}%', PathStr) = 0 then RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;' + PathStr);
 
-   // show a warning, that the System {#GamsDirVar} will have a higher precedence
-   if RegValueExists(HKCU, 'Environment', '{#GamsDirVar}')
-   then MsgBox('A {#GamsDirVar} user environment variable is present from a previous installation. When using the PATH variable, user {#GamsDirVar} will take precedence over system {#GamsDirVar}.', mbInformation, MB_OK)
+   // Windows puts the user PATH after the system PATH, so entries from an earlier all-users installation come first
+   if RegValueExists(HKLM, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', '{#GamsDirVar}')
+   then MsgBox('A {#GamsDirVar} system environment variable is present from a previous all-users installation. Its entry in the system PATH variable will take precedence over this installation.', mbInformation, MB_OK)
 end;
 
 {Undo UpdatePath, but only if {#GamsDirVar} still points to this installation.}
@@ -213,8 +214,8 @@ var
     Hive: Integer;
     SubKey, GamsDir, PathStr: String;
 begin
-   Hive := HKLM
-   SubKey := 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+   Hive := HKCU
+   SubKey := 'Environment'
    if RegQueryStringValue(Hive, SubKey, '{#GamsDirVar}', GamsDir) and (GamsDir = ExpandConstant('{#GamsSysDir}')) then
    begin
       RegDeleteValue(Hive, SubKey, '{#GamsDirVar}');
@@ -374,7 +375,7 @@ begin
   if wpReady = CurPage then
   begin
     Wizardform.ReadyMemo.Lines.Add(#13#10 + 'Additional Tasks:');
-    Wizardform.ReadyMemo.Lines.Add('    Install for all users');
+    Wizardform.ReadyMemo.Lines.Add('    Install for the current user');
     Wizardform.ReadyMemo.Lines.Add('    Add GAMS directory to PATH environment variable');
     Wizardform.ReadyMemo.Lines.Add('    Create a desktop icon for Veda2.0');
   end;
