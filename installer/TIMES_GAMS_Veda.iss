@@ -91,6 +91,8 @@ var
    LicenseTargetFile: String;
    L_LicenseSource: TLabel;
    L_Intro: TNewStaticText;
+   L_PortalHint: TNewStaticText;
+   L_PortalLink: TNewStaticText;
    wpGamsLicense: Integer;
    ST_License: TNewStaticText;
    TE_AccessCode: TEdit;
@@ -115,6 +117,13 @@ begin
   end;
 end;
 
+
+procedure OpenPortal(Sender: TObject);
+var
+  ErrorCode: Integer;
+begin
+  ShellExecAsOriginalUser('open', 'https://portal.gams.com', '', '', SW_SHOWNORMAL, ewNoWait, ErrorCode);
+end;
 
 procedure BrowseCertificateFile(Sender: TObject);
 var
@@ -288,11 +297,28 @@ begin
   L_Intro.Top := ScaleY(0);
   L_Intro.Parent := Page.Surface;
 
+  L_PortalHint := TNewStaticText.Create(Page);
+  L_PortalHint.Caption := 'If you do not have an Access Code yet, register and create one at';
+  L_PortalHint.AutoSize := True;
+  L_PortalHint.Top := L_Intro.Top + L_Intro.Height + ScaleY(6);
+  L_PortalHint.Parent := Page.Surface;
+
+  L_PortalLink := TNewStaticText.Create(Page);
+  L_PortalLink.Caption := 'portal.gams.com';
+  L_PortalLink.AutoSize := True;
+  L_PortalLink.Top := L_PortalHint.Top;
+  L_PortalLink.Left := L_PortalHint.Left + L_PortalHint.Width + ScaleX(3);
+  L_PortalLink.Font.Color := clBlue;
+  L_PortalLink.Font.Style := [fsUnderline];
+  L_PortalLink.Cursor := crHand;
+  L_PortalLink.OnClick := @OpenPortal;
+  L_PortalLink.Parent := Page.Surface;
+
   L_LicenseSource := TLabel.Create(Page);
   L_LicenseSource.Caption := '';
   L_LicenseSource.Width := Page.SurfaceWidth;
   L_LicenseSource.Height := ScaleY(20);
-  L_LicenseSource.Top := L_Intro.Top + L_Intro.Height + ScaleY(15);
+  L_LicenseSource.Top := L_PortalHint.Top + L_PortalHint.Height + ScaleY(15);
   L_LicenseSource.Parent := Page.Surface;
 
   ST_AccessCode := TNewStaticText.Create(Page);
