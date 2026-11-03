@@ -12,22 +12,23 @@ The installer is built by a GitHub Actions workflow and written with [Inno Setup
 
 | Path | Purpose |
 |---|---|
-| `.python-version` | Python version to bundle |
-| `.gamspy-version` | GAMSPy version to bundle |
-| `.veda-version` | Veda version to bundle |
+| `versions.txt` | Versions of uv, Python, GAMSPy and Veda to build with |
 | `.github/workflows/build-installer.yml` | Workflow that builds the installer |
 | `installer/TIMES_GAMS_Veda.iss` | Inno Setup script |
 | `installer/assets/` | Installer icon and wizard images |
 
 ## Choosing versions
 
-Each version file contains a single line:
+`versions.txt` contains one `name = version` line per component. Lines starting with `#` are comments. Each version is an exact version or `latest`:
 
-| File | Allowed values | Examples |
+| Name | Allowed values | Examples |
 |---|---|---|
-| `.python-version` | A Python version as understood by uv. A minor version picks its newest patch release. | `3.14`, `3.14.2` |
-| `.gamspy-version` | An exact version from [PyPI](https://pypi.org/project/gamspy/), or `latest` | `1.18.0`, `latest` |
-| `.veda-version` | An exact release from [Veda2.0-Installation](https://github.com/kanors-emr/Veda2.0-Installation/releases) without the leading `v`, or `latest` | `5.0.0.0`, `latest` |
+| `uv` | An exact release from [uv](https://github.com/astral-sh/uv/releases), or `latest` | `0.9.5`, `latest` |
+| `python` | A Python version as understood by uv, or `latest`. A minor version picks its newest patch release. | `3.14`, `3.14.2`, `latest` |
+| `gamspy` | An exact version from [PyPI](https://pypi.org/project/gamspy/), or `latest` | `1.18.0`, `latest` |
+| `veda` | An exact release from [Veda2.0-Installation](https://github.com/kanors-emr/Veda2.0-Installation/releases) without the leading `v`, or `latest` | `5.0.0.0`, `latest` |
+
+uv is only used to build the installer and is not bundled.
 
 With `latest`, every build picks up the newest release at that moment. Two builds can therefore differ even without a change in this repository. Use exact versions for reproducible builds.
 
@@ -44,7 +45,7 @@ Artifacts are deleted after one day.
 
 The workflow runs on GitHub's hosted `windows-latest` runner and performs these steps:
 
-1. Installs the Python version from `.python-version` with uv and copies it to `build\python`.
+1. Reads `versions.txt`, sets up uv, installs the Python version with uv and copies it to `build\python`.
 2. Installs GAMSPy into that Python and runs `gamspy install solver --install-all-solvers`.
 3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`. It reads the TIMES version from `initsys.mod` in the `GAMS_SrcTIMES.<version>` folder of the zip.
 4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the TIMES version as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.

@@ -14,7 +14,7 @@
 ; Environment variable that points to GamsSysDir and is added to PATH (TIMES_GAMS_VEDA_GAMSDIR).
 ; Not GAMSDIR, which belongs to regular GAMS installations.
 #define GamsDirVar=Uppercase(MyAppName) + "_GAMSDIR"
-; Veda version, passed by the pipeline from .veda-version (ISCC /DVedaVersion=5.0.0.0)
+; Veda version, passed by the pipeline from versions.txt (ISCC /DVedaVersion=5.0.0.0)
 #ifndef VedaVersion
   #error VedaVersion is not defined. Pass it to the compiler with /DVedaVersion=<version>.
 #endif

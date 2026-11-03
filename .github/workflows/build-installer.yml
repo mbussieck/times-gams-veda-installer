@@ -18,18 +18,36 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
+      - name: Read versions
+        id: versions
+        shell: pwsh
+        run: |
+          # versions.txt holds one "name = version" line per component, each an exact version or "latest"
+          $versions = Get-Content versions.txt -Raw | ConvertFrom-StringData
+          foreach ($name in "uv", "python", "gamspy", "veda") {
+            if (-not $versions[$name]) { throw "versions.txt has no version for $name" }
+            Write-Host "${name}: $($versions[$name])"
+            "$name=$($versions[$name])" >> $env:GITHUB_OUTPUT
+          }
+
       - name: Set up uv
         uses: astral-sh/setup-uv@v10.3.3
         with:
+          version: ${{ steps.versions.outputs.uv }}
           # Every installer build starts from scratch
           enable-cache: false
 
       - name: Install Python
         shell: pwsh
-        # uv picks the Python version from .python-version (e.g. 3.14 -> latest 3.14.x)
+        env:
+          VERSION: ${{ steps.versions.outputs.python }}
         run: |
-          uv python install
-          $python = uv python find --managed-python
+          # Without a version request, uv picks the newest Python; a minor version (e.g. 3.14) picks the newest 3.14.x
+          $request = @()
+          if ($env:VERSION -ne "latest") { $request = @($env:VERSION) }
+          uv python install @request
+          if ($LASTEXITCODE -ne 0) { throw "Could not install Python $env:VERSION" }
+          $python = uv python find --managed-python @request
           # Copy to a version-independent folder that the installer script expects
           Copy-Item (Split-Path $python) build\python -Recurse
           # The copy is no longer managed by uv; this marker would block installing packages into it
@@ -40,11 +58,11 @@ jobs:
 
       - name: Install GAMSPy
         shell: pwsh
+        env:
+          VERSION: ${{ steps.versions.outputs.gamspy }}
         run: |
-          # .gamspy-version holds an exact version (e.g. 1.18.0) or "latest"
-          $version = (Get-Content .gamspy-version -First 1).Trim()
           $package = "gamspy"
-          if ($version -ne "latest") { $package = "$package==$version" }
+          if ($env:VERSION -ne "latest") { $package = "$package==$env:VERSION" }
           uv pip install --python $env:PYTHON --upgrade $package
           # The gamspy_base version is the GAMS version
           $gamsVersion = (uv pip show --python $env:PYTHON gamspy_base | Select-String '^Version:\s*(\S+)').Matches[0].Groups[1].Value
@@ -60,9 +78,9 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.versions.outputs.veda }}
         run: |
-          # .veda-version holds an exact version (e.g. 5.0.0.0) or "latest"
-          $version = (Get-Content .veda-version -First 1).Trim()
+          $version = $env:VERSION
           $repo = "kanors-emr/Veda2.0-Installation"
           if ($version -eq "latest") {
             $version = (gh release view --repo $repo --json tagName --jq .tagName).TrimStart("v")
