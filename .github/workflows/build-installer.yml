@@ -82,13 +82,13 @@ jobs:
           # Inno Setup is preinstalled on the Windows runner images
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { throw "Inno Setup not found at $iscc" }
-          & $iscc "/O$env:GITHUB_WORKSPACE\build\installer" "/DMyAppVersion=$env:GAMS_VERSION" "/DVedaVersion=$env:VEDA_VERSION" installer\vedapy.iss
+          & $iscc "/O$env:GITHUB_WORKSPACE\build\installer" "/DMyAppVersion=$env:GAMS_VERSION" "/DVedaVersion=$env:VEDA_VERSION" installer\TIMES_GAMS_Veda.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
 
       - name: Upload installer
         uses: actions/upload-artifact@v7
         with:
-          name: VedaPy-setup
+          name: TIMES_GAMS_Veda-setup
           path: build/installer/*.exe
           if-no-files-found: error
           retention-days: 1
