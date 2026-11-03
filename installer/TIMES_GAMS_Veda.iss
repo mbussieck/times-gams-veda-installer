@@ -11,9 +11,9 @@
 #endif
 ; GAMS system that comes with GAMSPy in the bundled Python (build\python from the pipeline)
 #define GamsSysDir="{app}\python\Lib\site-packages\gamspy_base"
-; Environment variable that points to GamsSysDir and is added to PATH.
+; Environment variable that points to GamsSysDir and is added to PATH (TIMES_GAMS_VEDA_GAMSDIR).
 ; Not GAMSDIR, which belongs to regular GAMS installations.
-#define GamsDirVar="VEDAPY_GAMSDIR"
+#define GamsDirVar=Uppercase(MyAppName) + "_GAMSDIR"
 ; Veda version, passed by the pipeline from .veda-version (ISCC /DVedaVersion=5.0.0.0)
 #ifndef VedaVersion
   #error VedaVersion is not defined. Pass it to the compiler with /DVedaVersion=<version>.
@@ -30,7 +30,7 @@ AppVerName={#MyAppName} {#MyAppVersion}
 ChangesEnvironment=yes
 DefaultDirName=C:\{#MyAppName}
 DefaultGroupName={#MyAppName}
-; Installs for the current user only, without admin rights. UpdatePath writes VEDAPY_GAMSDIR
+; Installs for the current user only, without admin rights. UpdatePath writes GamsDirVar
 ; and PATH to the user environment (HKCU), and shortcuts and the uninstall entry are per user.
 PrivilegesRequired=lowest
 OutputBaseFilename={#MyAppName}-setup
@@ -497,7 +497,7 @@ begin
    if usUninstall = CurUninstallStep
    then
    begin
-      // TODO: Call RemovePath() to undo the PATH and VEDAPY_GAMSDIR changes on uninstall
+      // TODO: Call RemovePath() to undo the PATH and {#GamsDirVar} changes on uninstall
    end;
 end;
 
