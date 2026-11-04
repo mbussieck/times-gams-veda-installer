@@ -179,10 +179,6 @@ begin
    // The user Path can be REG_SZ, unlike the system Path.
    if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then    RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;')
    else if Pos('%{#GamsDirVar}%', PathStr) = 0 then RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;' + PathStr);
-
-   // Windows puts the user PATH after the system PATH, so entries from an earlier all-users installation come first
-   if RegValueExists(HKLM, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', '{#GamsDirVar}')
-   then MsgBox('A {#GamsDirVar} system environment variable is present from a previous all-users installation. Its entry in the system PATH variable will take precedence over this installation.', mbInformation, MB_OK)
 end;
 
 {Undo UpdatePath, but only if {#GamsDirVar} still points to this installation.
