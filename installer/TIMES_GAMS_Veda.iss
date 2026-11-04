@@ -122,7 +122,7 @@ end;
 {Write the fetched license. Replaces the demo license that ships with gamspy_base.}
 function WriteLicenseFile(): Boolean;
 begin
-  Result := SaveStringToFile(ExpandConstant('{#GamsSysDir}\gamslice.txt'), LicenseStr, False)
+  Result := SaveStringToFile(ExpandConstant('{#GamsSysDir}\gamslice.txt'), LicenseStr, False);
   if not Result then MsgBox('Could not write license to file', mbInformation, MB_OK);
 end;
 
@@ -293,7 +293,7 @@ begin
   TE_Server.Font.Name := 'Courier New';
   TE_Server.Width := ScaleX(300);
   TE_Server.Top := TE_AccessCode.Top + TE_AccessCode.Height;
-  TE_Server.Left := TE_AccessCode.Left
+  TE_Server.Left := TE_AccessCode.Left;
   TE_Server.Parent := Page.Surface;
   TE_Server.OnChange := @OnTEServerChange;
   TE_Server.Hide();
@@ -316,7 +316,7 @@ begin
   TE_Certificate := TEdit.Create(Page);
   TE_Certificate.Font.Name := 'Courier New';
   TE_Certificate.Width := ScaleX(300);
-  TE_Certificate.Top := TE_Server.Top + TE_Server.Height;;
+  TE_Certificate.Top := TE_Server.Top + TE_Server.Height;
   TE_Certificate.Left := TE_Server.Left;
   TE_Certificate.Parent := Page.Surface;
   TE_Certificate.Hide();

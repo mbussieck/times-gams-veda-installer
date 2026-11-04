@@ -64,9 +64,7 @@ jobs:
           $package = "gamspy"
           if ($env:VERSION -ne "latest") { $package = "$package==$env:VERSION" }
           uv pip install --python $env:PYTHON --upgrade $package
-          # The gamspy_base version is the GAMS version
-          $gamsVersion = (uv pip show --python $env:PYTHON gamspy_base | Select-String '^Version:\s*(\S+)').Matches[0].Groups[1].Value
-          Write-Host "GAMS version: $gamsVersion"
+          if ($LASTEXITCODE -ne 0) { throw "Could not install $package" }
 
       - name: Install all GAMSPy solvers
         shell: pwsh
