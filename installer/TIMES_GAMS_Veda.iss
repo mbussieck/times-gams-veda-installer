@@ -27,9 +27,9 @@
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 AppName={#MyAppDisplayName}
-; TODO: List the bundled component versions (GAMSPy, TIMES, Veda) or drop them
 AppVerName={#MyAppDisplayName} {#MyAppVersion}
-; TODO: Add AppPublisher, AppPublisherURL, AppSupportURL and AppUpdatesURL
+; TODO: Add AppPublisher. It is shown in the Publisher column of Apps & features and is also
+; used for VersionInfoCompany in the setup file's properties.
 ChangesEnvironment=yes
 DefaultDirName=C:\{#MyAppName}
 DefaultGroupName={#MyAppName}
@@ -39,7 +39,8 @@ PrivilegesRequired=lowest
 OutputBaseFilename={#MyAppName}-setup
 
 UsePreviousLanguage=no
-DirExistsWarning=no
+; Warn if the chosen folder already exists, except for the folder of a previous installation
+DirExistsWarning=auto
 
 SolidCompression=true
 Compression=lzma/ultra
@@ -53,7 +54,6 @@ AllowRootDirectory=true
 ; installation (found via AppId), so two versions cannot be installed side by side
 UsePreviousAppDir=yes
 InternalCompressLevel=ultra
-; TODO: Add VersionInfoCompany
 VersionInfoTextVersion={#MyAppVersion}
 VersionInfoVersion={#MyAppVersion}
 VersionInfoDescription={#MyAppDisplayName} installer
@@ -115,18 +115,6 @@ var
    ST_Server: TNewStaticText;
    ST_Certificate: TNewStaticText;
    ALPSuccess, IsOnPrem: Boolean;
-
-function GetGamsDirVersion(Path: String): String;
-var
-  lines: AnsiString;
-begin
-  Result := '';
-  if FileExists(Path + '\gamsstmp.txt') and FileExists(Path + '\optgams.def') then
-  begin
-    LoadStringFromFile(Path + '\gamsstmp.txt', lines);
-    Result := Copy(lines, 5, 6);
-  end;
-end;
 
 
 procedure OpenPortal(Sender: TObject);
@@ -432,9 +420,6 @@ end;
 
 function NextButtonClick(CurPage: Integer): Boolean;
 var
-  oldGamsVersion: String;
-  oldMajor, oldMinor, oldMaintenance: Integer;
-  newMajor, newMinor, newMaintenance: Integer;
   dirRes: Integer;
   dir1, dir2: String;
   dirAnsi: AnsiString;
@@ -454,65 +439,6 @@ begin
       if dirRes = IDNO then
         Result := False;
     end;
-    // TODO: This looks for a GAMS system (gamsstmp.txt) directly in the target folder, but the
-    // GAMS system is now in gamspy_base, which has no gamsstmp.txt. Decide whether this check is still needed.
-    if Result and DirExists(ExpandConstant('{app}')) then
-    begin
-      oldGamsVersion := GetGamsDirVersion(ExpandConstant('{app}'));
-      if oldGamsVersion = '' then
-        dirRes := MsgBox('The folder:'+ #13#10#13#10 + ExpandConstant('{app}') + #13#10#13#10 +
-                                     'already exists. Would you like to install to that folder anyway?',
-                                     mbConfirmation, MB_YESNO)
-      else
-      begin
-        try
-          newMajor       := StrToInt(Copy(ExpandConstant('{#MyAppVersion}'), 1, 2));
-          newMinor       := StrToInt(Copy(ExpandConstant('{#MyAppVersion}'), 4, 1));
-          newMaintenance := StrToInt(Copy(ExpandConstant('{#MyAppVersion}'), 6, 1));
-          oldMajor       := StrToInt(Copy(oldGamsVersion, 1, 2));
-          oldMinor       := StrToInt(Copy(oldGamsVersion, 4, 1));
-          oldMaintenance := StrToInt(Copy(oldGamsVersion, 6, 1));
-
-          if newMajor < oldMajor then
-            dirRes := MsgBox('The folder:'+ #13#10#13#10 + ExpandConstant('{app}') + #13#10#13#10 +
-                                         'contains a more recent GAMS installation (' + oldGamsVersion + '). Would you like to install to that folder anyway? (not recommended)',
-                                         mbConfirmation, MB_YESNO)
-          else if newMajor > oldMajor then
-            dirRes := MsgBox('The folder:'+ #13#10#13#10 + ExpandConstant('{app}') + #13#10#13#10 +
-                                         'contains an older GAMS installation (' + oldGamsVersion + '). Would you like to install to that folder anyway? (not recommended)',
-                                         mbConfirmation, MB_YESNO)
-          else if newMinor < oldMinor then
-            dirRes := MsgBox('The folder:'+ #13#10#13#10 + ExpandConstant('{app}') + #13#10#13#10 +
-                                         'contains a more recent GAMS installation (' + oldGamsVersion + '). Would you like to install to that folder anyway? (not recommended)',
-                                         mbConfirmation, MB_YESNO)
-          else if newMinor > oldMinor then
-            dirRes := MsgBox('The folder:'+ #13#10#13#10 + ExpandConstant('{app}') + #13#10#13#10 +
-                                         'contains an older GAMS installation of the same major release (' + oldGamsVersion + '). Would you like to install to that folder anyway?',
-                                         mbConfirmation, MB_YESNO)
-          else if newMaintenance < oldMaintenance then
-            dirRes := MsgBox('The folder:'+ #13#10#13#10 + ExpandConstant('{app}') + #13#10#13#10 +
-                                         'contains a more recent GAMS installation (' + oldGamsVersion + '). Would you like to install to that folder anyway? (not recommended)',
-                                         mbConfirmation, MB_YESNO)
-          else if newMaintenance > oldMaintenance then
-            dirRes := MsgBox('The folder:'+ #13#10#13#10 + ExpandConstant('{app}') + #13#10#13#10 +
-                                         'contains an older GAMS installation of the same major release (' + oldGamsVersion + '). Would you like to install to that folder anyway?',
-                                         mbConfirmation, MB_YESNO)
-          else
-            dirRes := MsgBox('The folder:'+ #13#10#13#10 + ExpandConstant('{app}') + #13#10#13#10 +
-                                         'contains a GAMS installation with an identical version number (' + oldGamsVersion + '). Would you like to install to that folder anyway?',
-                                         mbConfirmation, MB_YESNO);
-        except
-          dirRes := MsgBox('Exception occurred while determining version information: ' + #13#10 + AddPeriod(GetExceptionMessage)+ #13#10#13#10 + 'Do you want to continue anyway?' , mbConfirmation, MB_YESNO); 
-        end;
-      end;
-      if dirRes = IDYES then
-        Result := True
-      else
-      begin
-        WizardForm.ActiveControl := WizardForm.DirEdit;
-        Result := False;
-      end;
-    end
   end
   else if wpGamsLicense = CurPage then
   begin
