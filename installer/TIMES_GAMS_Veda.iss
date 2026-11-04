@@ -43,7 +43,6 @@ SolidCompression=true
 Compression=lzma/ultra
 AppId={#MyAppName}
 AppVersion={#MyAppVersion}
-AllowRootDirectory=true
 ; Together with DisableDirPage=auto: an upgrade always goes into the folder of the previous
 ; installation (found via AppId), so two versions cannot be installed side by side
 UsePreviousAppDir=yes
