@@ -175,10 +175,10 @@ var
 begin
    Hive := HKCU
    SubKey := 'Environment'
-   // Always write Path as REG_EXPAND_SZ, otherwise %{#GamsDirVar}% is not expanded.
-   // The user Path can be REG_SZ, unlike the system Path.
+   // A new Path is created as REG_EXPAND_SZ, so %{#GamsDirVar}% is expanded. An existing Path keeps
+   // its type, since that is the user's setting (RegWriteStringValue keeps REG_EXPAND_SZ).
    if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;')
-   else if Pos('%{#GamsDirVar}%', PathStr) = 0 then RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;' + PathStr);
+   else if Pos('%{#GamsDirVar}%', PathStr) = 0 then RegWriteStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;' + PathStr);
 end;
 
 {Undo UpdatePath, but only if {#GamsDirVar} still points to this installation.
@@ -193,7 +193,7 @@ begin
    if RegQueryStringValue(Hive, SubKey, '{#GamsDirVar}', GamsDir) and (GamsDir = ExpandConstant('{#GamsSysDir}')) then
    begin
       if RegQueryStringValue(Hive, SubKey, 'Path', PathStr) and (StringChangeEx(PathStr, '%{#GamsDirVar}%;', '', True) > 0) then
-         RegWriteExpandStringValue(Hive, SubKey, 'Path', PathStr);
+         RegWriteStringValue(Hive, SubKey, 'Path', PathStr);
    end;
 end;
 
