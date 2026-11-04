@@ -362,10 +362,16 @@ begin
     TE_Certificate.Text := ExpandConstant('{#GamsSysDir}\gamslice.crt');
 
   if wpFinished = CurPage then
-  begin
     WriteLicenseFile();
+end;
+
+{called during installation}
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  // Right after the files and [Registry] entries, so the change is part of the
+  // environment refresh at the end of the installation (ChangesEnvironment)
+  if ssPostInstall = CurStep then
     UpdatePath();
-  end;
 end;
 
 function NextButtonClick(CurPage: Integer): Boolean;
