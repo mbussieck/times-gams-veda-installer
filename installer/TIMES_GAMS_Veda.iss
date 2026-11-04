@@ -352,7 +352,7 @@ procedure CurPageChanged(CurPage: Integer);
 begin
   if wpReady = CurPage then
   begin
-    Wizardform.ReadyMemo.Lines.Add(#13#10 + 'Additional Tasks:');
+    Wizardform.ReadyMemo.Lines.Add(#13#10 + 'Setup will also:');
     Wizardform.ReadyMemo.Lines.Add('    Add GAMS directory to PATH environment variable');
     Wizardform.ReadyMemo.Lines.Add('    Create a desktop icon for Veda2.0');
   end;
