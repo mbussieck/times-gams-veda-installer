@@ -1,6 +1,6 @@
-# VedaPy
+# TIMES/GAMS/Veda installer
 
-VedaPy builds the Windows installer for **TIMES_GAMS_Veda** (`TIMES_GAMS_Veda-setup.exe`), which bundles:
+This repository builds the Windows installer for **TIMES/GAMS/Veda** (`TIMES_GAMS_Veda-setup.exe`), which bundles:
 
 - a standalone **Python** (downloaded with [uv](https://docs.astral.sh/uv/)),
 - **[GAMSPy](https://github.com/GAMS-dev/gamspy)** with all solvers, installed into that Python. Its `gamspy_base` package provides the GAMS system.
@@ -83,7 +83,7 @@ Installed layout:
 During installation it:
 
 - Asks for a GAMS access code and retrieves a license with `gamsgetkey`. The license is written to `gamspy_base\gamslice.txt` and replaces the demo license that ships with GAMSPy.
-- Sets the user environment variable `TIMES_GAMS_VEDA_GAMSDIR` to the `gamspy_base` folder. It also adds `%TIMES_GAMS_VEDA_GAMSDIR%` to the front of the user `PATH`. Windows appends the user `PATH` to the system `PATH`, so a GAMS on the system `PATH` takes precedence. VedaPy uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.
+- Sets the user environment variable `TIMES_GAMS_VEDA_GAMSDIR` to the `gamspy_base` folder. It also adds `%TIMES_GAMS_VEDA_GAMSDIR%` to the front of the user `PATH`. Windows appends the user `PATH` to the system `PATH`, so a GAMS on the system `PATH` takes precedence. The installer uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.
 - Creates a **Veda2.0** shortcut on the desktop of the current user and offers to launch Veda when setup finishes.
 
 The uninstaller removes the installed files, the desktop shortcut, `TIMES_GAMS_VEDA_GAMSDIR` and its `PATH` entry.

@@ -51,10 +51,10 @@ VersionInfoTextVersion={#MyAppVersion}
 VersionInfoVersion={#MyAppVersion}
 VersionInfoDescription={#MyAppDisplayName} installer
 OutputDir=.
-SetupIconFile=assets\vedapy.ico
+SetupIconFile=assets\setup.ico
 
-WizardImageFile = assets\vedapy_left.bmp
-WizardSmallImageFile = assets\vedapy_small.bmp
+WizardImageFile = assets\wizard.bmp
+WizardSmallImageFile = assets\wizard_small.bmp
 WizardSizePercent = 130
 
 DisableWelcomePage=no
