@@ -74,7 +74,7 @@ Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}
 Name: {autodesktop}\Veda2.0; Filename: {#VedaDir}\Veda2.0.exe
 
 [Run]
-Filename: {#VedaDir}\Veda2.0.exe; Description: Launch Veda2.0; Flags: nowait postinstall skipifsilent
+Filename: {#VedaDir}\Veda2.0.exe; Description: Launch Veda2.0; Flags: nowait postinstall
 
 [Registry]
 ; User environment variable that points to the GAMS system. The uninstaller deletes it.
@@ -123,7 +123,7 @@ end;
 function WriteLicenseFile(): Boolean;
 begin
   Result := SaveStringToFile(ExpandConstant('{#GamsSysDir}\gamslice.txt'), LicenseStr, False)
-  if not WizardSilent and not Result then MsgBox('Could not write license to file', mbInformation, MB_OK);
+  if not Result then MsgBox('Could not write license to file', mbInformation, MB_OK);
 end;
 
 procedure CheckOnPremServer();
@@ -375,7 +375,7 @@ var
   dirAnsi: AnsiString;
 begin
   Result:=True;
-  if not WizardSilent and (wpSelectDir = CurPage) then
+  if wpSelectDir = CurPage then
   begin
     Result := True;
     dir1 := ExpandConstant('{app}');
@@ -395,7 +395,7 @@ begin
     Result := True;
     if not ALPSuccess then
     begin
-      if not WizardSilent then MsgBox('Please fetch a license by clicking on the "Get License" button first.', mbConfirmation, MB_OK);
+      MsgBox('Please fetch a license by clicking on the "Get License" button first.', mbConfirmation, MB_OK);
       Result := False;
     end;
   end;
@@ -411,7 +411,16 @@ begin
    end;
 end;
 
-{initialize the wizard}                  
+{Silent installs are not supported, since the license page needs an Access Code from the user}
+function InitializeSetup(): Boolean;
+begin
+  Result := not WizardSilent;
+  if not Result then
+    MsgBox('{#MyAppDisplayName} cannot be installed silently, since a GAMS license has to be retrieved with an Access Code during the installation.' + #13#10#13#10 +
+           'Please run Setup without /SILENT or /VERYSILENT.', mbError, MB_OK);
+end;
+
+{initialize the wizard}
 procedure InitializeWizard();
 begin
   LicenseStr := '';
