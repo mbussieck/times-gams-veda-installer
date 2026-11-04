@@ -33,7 +33,7 @@ AppVerName={#MyAppDisplayName} {#MyAppVersion}
 ChangesEnvironment=yes
 DefaultDirName=C:\{#MyAppName}
 DefaultGroupName={#MyAppName}
-; Installs for the current user only, without admin rights. UpdatePath writes GamsDirVar
+; Installs for the current user only, without admin rights. [Registry] and UpdatePath write GamsDirVar
 ; and PATH to the user environment (HKCU), and shortcuts and the uninstall entry are per user.
 PrivilegesRequired=lowest
 OutputBaseFilename={#MyAppName}-setup
@@ -87,6 +87,11 @@ Name: {autodesktop}\Veda2.0; Filename: {#VedaDir}\Veda2.0.exe
 [Run]
 ; NOTE: The following entry contains an English phrase ("Launch"). You are free to translate it into another language if required.
 Filename: {#VedaDir}\Veda2.0.exe; Description: Launch Veda2.0; Flags: nowait postinstall skipifsilent
+
+[Registry]
+; User environment variable that points to the GAMS system. The uninstaller deletes it.
+; Its PATH entry is added by UpdatePath and removed by RemovePath in [Code].
+Root: HKCU; Subkey: Environment; ValueType: string; ValueName: {#GamsDirVar}; ValueData: {#GamsSysDir}; Flags: uninsdeletevalue
 
 [Code]
 
@@ -204,7 +209,7 @@ begin
   ST_License.Font.Height := ScaleY(13);
 end;
 
-{Update the user PATH variable and a user {#GamsDirVar} variable.}
+{Add %{#GamsDirVar}% to the user PATH variable. The variable itself is written by [Registry].}
 procedure UpdatePath();
 var
     Hive: Integer;
@@ -212,7 +217,6 @@ var
 begin
    Hive := HKCU
    SubKey := 'Environment'
-   RegWriteStringValue(Hive, SubKey, '{#GamsDirVar}', ExpandConstant('{#GamsSysDir}'));
    // Always write Path as REG_EXPAND_SZ, otherwise %{#GamsDirVar}% is not expanded.
    // The user Path can be REG_SZ, unlike the system Path.
    if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then    RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;')
@@ -223,7 +227,8 @@ begin
    then MsgBox('A {#GamsDirVar} system environment variable is present from a previous all-users installation. Its entry in the system PATH variable will take precedence over this installation.', mbInformation, MB_OK)
 end;
 
-{Undo UpdatePath, but only if {#GamsDirVar} still points to this installation.}
+{Undo UpdatePath, but only if {#GamsDirVar} still points to this installation.
+ Called before the uninstaller deletes {#GamsDirVar} ([Registry]), so the variable can still be checked.}
 procedure RemovePath();
 var
     Hive: Integer;
@@ -233,9 +238,8 @@ begin
    SubKey := 'Environment'
    if RegQueryStringValue(Hive, SubKey, '{#GamsDirVar}', GamsDir) and (GamsDir = ExpandConstant('{#GamsSysDir}')) then
    begin
-      RegDeleteValue(Hive, SubKey, '{#GamsDirVar}');
       if RegQueryStringValue(Hive, SubKey, 'Path', PathStr) and (StringChangeEx(PathStr, '%{#GamsDirVar}%;', '', True) > 0) then
-         RegWriteStringValue(Hive, SubKey, 'Path', PathStr);
+         RegWriteExpandStringValue(Hive, SubKey, 'Path', PathStr);
    end;
 end;
 
@@ -528,7 +532,7 @@ begin
    if usUninstall = CurUninstallStep
    then
    begin
-      // TODO: Call RemovePath() to undo the PATH and {#GamsDirVar} changes on uninstall
+      RemovePath();
    end;
 end;
 

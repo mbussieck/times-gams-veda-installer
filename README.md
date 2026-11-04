@@ -86,4 +86,4 @@ During installation it:
 - Sets the user environment variable `TIMES_GAMS_VEDA_GAMSDIR` to the `gamspy_base` folder. It also adds `%TIMES_GAMS_VEDA_GAMSDIR%` to the front of the user `PATH`. Windows appends the user `PATH` to the system `PATH`, so a GAMS on the system `PATH` takes precedence. VedaPy uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.
 - Creates a **Veda2.0** shortcut on the desktop of the current user and offers to launch Veda when setup finishes.
 
-The uninstaller removes the installed files and the desktop shortcut. It currently leaves `TIMES_GAMS_VEDA_GAMSDIR` and the `PATH` entry in place.
+The uninstaller removes the installed files, the desktop shortcut, `TIMES_GAMS_VEDA_GAMSDIR` and its `PATH` entry.
