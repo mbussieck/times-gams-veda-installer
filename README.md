@@ -70,7 +70,7 @@ The script refuses to compile without these two values.
 
 ## What the installer does
 
-The installer's version is the TIMES version that comes with Veda, for example `4.9.7`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES_GAMS_Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time. Silent installation (`/SILENT`, `/VERYSILENT`) is not supported, since the license has to be retrieved with an Access Code in the wizard.
+The installer's version is the TIMES version that comes with Veda, for example `4.9.7`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES/GAMS/Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time. Silent installation (`/SILENT`, `/VERYSILENT`) is not supported, since the license has to be retrieved with an Access Code in the wizard.
 
 Installed layout:
 
@@ -82,7 +82,7 @@ Installed layout:
 
 During installation it:
 
-- Asks for a GAMS access code and retrieves a license with `gamsgetkey`. The license is written to `gamspy_base\gamslice.txt` and replaces the demo license that ships with GAMSPy.
+- Asks for a GAMS Access Code and retrieves a license with `gamsgetkey`. The license is written to `gamspy_base\gamslice.txt` and replaces the demo license that ships with GAMSPy.
 - Sets the user environment variable `TIMES_GAMS_VEDA_GAMSDIR` to the `gamspy_base` folder. It also adds `%TIMES_GAMS_VEDA_GAMSDIR%` to the front of the user `PATH`. Windows appends the user `PATH` to the system `PATH`, so a GAMS on the system `PATH` takes precedence. The installer uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.
 - Creates a **Veda2.0** shortcut on the desktop of the current user and offers to launch Veda when setup finishes.
 
