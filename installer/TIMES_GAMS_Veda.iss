@@ -120,10 +120,9 @@ begin
 end;
 
 {Write the fetched license. Replaces the demo license that ships with gamspy_base.}
-function WriteLicenseFile(): Boolean;
+procedure WriteLicenseFile();
 begin
-  Result := SaveStringToFile(ExpandConstant('{#GamsSysDir}\gamslice.txt'), LicenseStr, False);
-  if not Result then MsgBox('Could not write license to file', mbInformation, MB_OK);
+  if not SaveStringToFile(ExpandConstant('{#GamsSysDir}\gamslice.txt'), LicenseStr, False) then MsgBox('Could not write license to file', mbInformation, MB_OK);
 end;
 
 procedure CheckOnPremServer();
@@ -405,7 +404,7 @@ begin
   end;
 end;
 
-{called when a wizard page changes during uninstallation}
+{called for each step of the uninstallation}
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
    if usUninstall = CurUninstallStep
