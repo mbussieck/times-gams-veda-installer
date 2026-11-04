@@ -86,9 +86,7 @@ Root: HKCU; Subkey: Environment; ValueType: string; ValueName: {#GamsDirVar}; Va
 {global variables}
 var
    CertificateFile: String;
-   LicenseStr, LicenseStrALP: AnsiString;
-   LicenseTargetFile: String;
-   L_LicenseSource: TLabel;
+   LicenseStr: AnsiString;
    L_Intro: TNewStaticText;
    L_PortalHint: TNewStaticText;
    L_PortalLink: TNewStaticText;
@@ -121,10 +119,10 @@ begin
   if Success then TE_Certificate.Text := CertificateFile;
 end;
 
-{Write license file from string}
+{Write the fetched license. Replaces the demo license that ships with gamspy_base.}
 function WriteLicenseFile(): Boolean;
 begin
-  Result := SaveStringToFile(LicenseTargetFile, LicenseStr, False)
+  Result := SaveStringToFile(ExpandConstant('{#GamsSysDir}\gamslice.txt'), LicenseStr, False)
   if not WizardSilent and not Result then MsgBox('Could not write license to file', mbInformation, MB_OK);
 end;
 
@@ -165,24 +163,8 @@ begin
     TE_Certificate.Hide();
     TB_Certificate.Hide();
     TB_GetLicense.Enabled := True;
-    ST_License.Top := L_LicenseSource.Top + L_LicenseSource.Height + ScaleX(10);
+    ST_License.Top := TE_AccessCode.Top + TE_AccessCode.Height + ScaleY(10);
   end;
-end;
-
-procedure UpdateLicenseSelection();
-begin
-  WizardForm.NextButton.Enabled := True;
-  ST_License.Top := L_LicenseSource.Top + L_LicenseSource.Height + ScaleX(10);
-  LicenseStr  := LicenseStrALP;
-  L_LicenseSource.Caption := '';
-  TE_AccessCode.Show();
-  TB_GetLicense.Show();
-  TB_Certificate.Show();
-  ST_AccessCode.Show();
-  CheckOnPrem(TE_AccessCode);
-
-  ST_License.Caption := LicenseStr;
-  ST_License.Font.Height := ScaleY(13);
 end;
 
 {Add %{#GamsDirVar}% to the user PATH variable. The variable itself is written by [Registry].}
@@ -228,7 +210,7 @@ var
   ArgString: String;
 begin
   WizardForm.NextButton.Enabled := False;
-  LicenseStrALP := '';
+  LicenseStr := '';
   ALPSuccess := False;
   ALPLicenseFile := ExpandConstant('{app}\_alp_license_tmp.txt');
   ALPLogFile := ExpandConstant('{app}\_gams_get_key_log.txt');
@@ -243,10 +225,9 @@ begin
   begin
     if ErrorLevel = 0 then
     begin
-      if LoadStringFromFile(ALPLicenseFile, LicenseStrALP) then
+      if LoadStringFromFile(ALPLicenseFile, LicenseStr) then
       begin
-        ST_License.Caption := LicenseStrALP;
-        LicenseStr := LicenseStrALP;
+        ST_License.Caption := LicenseStr;
         DeleteFile(ALPLicenseFile);
         ALPSuccess := True;
       end;
@@ -265,15 +246,11 @@ begin
   WizardForm.NextButton.Enabled := True;
 end;
 
-function HandleLicenseOptions(): Boolean;
-begin
-  Result := WriteLicenseFile;
-end;
-
 {Create License Page}
 function CreateLicensePage(): Integer;
 var
   Page: TWizardPage;
+  RowTop: Integer;
 begin
   Page := CreateCustomPage(wpInstalling, 'GAMS License', 'Retrieve a license using your Access Code');
 
@@ -300,27 +277,21 @@ begin
   L_PortalLink.OnClick := @OpenPortal;
   L_PortalLink.Parent := Page.Surface;
 
-  L_LicenseSource := TLabel.Create(Page);
-  L_LicenseSource.Caption := '';
-  L_LicenseSource.Width := Page.SurfaceWidth;
-  L_LicenseSource.Height := ScaleY(20);
-  L_LicenseSource.Top := L_PortalHint.Top + L_PortalHint.Height + ScaleY(15);
-  L_LicenseSource.Parent := Page.Surface;
+  // Row with the Access Code
+  RowTop := L_PortalHint.Top + L_PortalHint.Height + ScaleY(15);
 
   ST_AccessCode := TNewStaticText.Create(Page);
   ST_AccessCode.Caption := 'Access Code:';
-  ST_AccessCode.Top := L_LicenseSource.Top + ScaleY(3);
+  ST_AccessCode.Top := RowTop + ScaleY(3);
   ST_AccessCode.Parent := Page.Surface;
-  ST_AccessCode.Hide();
 
   TE_AccessCode := TEdit.Create(Page);
   TE_AccessCode.Font.Name := 'Courier New';
   TE_AccessCode.Width := ScaleX(300);
-  TE_AccessCode.Top := L_LicenseSource.Top;
+  TE_AccessCode.Top := RowTop;
   TE_AccessCode.Left := ST_AccessCode.Left + ST_AccessCode.Width + ScaleX(5);
   TE_AccessCode.Parent := Page.Surface;
   TE_AccessCode.OnChange := @CheckOnPrem;
-  TE_AccessCode.Hide();
 
   TE_Server := TEdit.Create(Page);
   TE_Server.Font.Name := 'Courier New';
@@ -341,10 +312,9 @@ begin
   TB_GetLicense.Caption := 'Get License';
   TB_GetLicense.Width := ScaleX(100);
   TB_GetLicense.Height := TE_AccessCode.Height + ScaleY(2);
-  TB_GetLicense.Top := L_LicenseSource.Top - ScaleY(1);
+  TB_GetLicense.Top := RowTop - ScaleY(1);
   TB_GetLicense.Left := TE_AccessCode.Left + TE_AccessCode.Width + ScaleX(5);
   TB_GetLicense.Parent := Page.Surface;
-  TB_GetLicense.Hide();
   TB_GetLicense.OnClick := @GetALPLicense;
 
   TE_Certificate := TEdit.Create(Page);
@@ -374,7 +344,7 @@ begin
   ST_License := TNewStaticText.Create(Page);
   ST_License.Font.Name := 'Courier New';
   ST_License.Font.Height := ScaleY(13);
-  ST_License.Top := L_LicenseSource.Top + L_LicenseSource.Height + ScaleX(10);
+  ST_License.Top := TE_AccessCode.Top + TE_AccessCode.Height + ScaleY(10);
   ST_License.Height := ScaleY(78);
   ST_License.Parent := Page.Surface;
 
@@ -391,17 +361,13 @@ begin
     Wizardform.ReadyMemo.Lines.Add('    Create a desktop icon for Veda2.0');
   end;
   
+  // {app} is only known after the folder selection, so the default certificate is set here
   if wpGamsLicense = CurPage then
-  begin
     TE_Certificate.Text := ExpandConstant('{#GamsSysDir}\gamslice.crt');
-    UpdateLicenseSelection();
-  end;
 
   if wpFinished = CurPage then
   begin
-    // Replaces the demo license that ships with gamspy_base
-    LicenseTargetFile := ExpandConstant('{#GamsSysDir}\gamslice.txt');
-    HandleLicenseOptions();
+    WriteLicenseFile();
     UpdatePath();
   end;
 end;
@@ -431,7 +397,6 @@ begin
   else if wpGamsLicense = CurPage then
   begin
     Result := True;
-    // License from Access Code is selected
     if not ALPSuccess then
     begin
       if not WizardSilent then MsgBox('Please fetch a license by clicking on the "Get License" button first.', mbConfirmation, MB_OK);
