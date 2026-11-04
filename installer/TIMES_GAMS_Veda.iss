@@ -214,11 +214,11 @@ begin
   ALPSuccess := False;
   ALPLicenseFile := ExpandConstant('{app}\_alp_license_tmp.txt');
   ALPLogFile := ExpandConstant('{app}\_gams_get_key_log.txt');
-  ArgString := ExpandConstant('/C ""{#GamsSysDir}\gamsgetkey.exe" ') + TE_AccessCode.Text + ' -o ' + ALPLicenseFile;
+  ArgString := ExpandConstant('/C ""{#GamsSysDir}\gamsgetkey.exe" ') + TE_AccessCode.Text + ' -o "' + ALPLicenseFile + '"';
   if (IsOnPrem) then
   begin
     ArgString := ArgString + ' -s ' + Trim(TE_Server.Text);
-    if Trim(TE_Certificate.Text) <> '' then ArgString := ArgString + ' -g ' + Trim(TE_Certificate.Text);
+    if Trim(TE_Certificate.Text) <> '' then ArgString := ArgString + ' -g "' + Trim(TE_Certificate.Text) + '"';
   end;
   ArgString := ArgString + ' > "' + ALPLogFile + '" 2>&1"';
   if Exec(ExpandConstant('{cmd}'), ArgString, ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, ErrorLevel) then
