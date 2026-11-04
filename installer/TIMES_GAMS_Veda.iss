@@ -153,7 +153,7 @@ begin
     TE_Certificate.Show();
     TB_Certificate.Show();
     CheckOnPremServer();
-    ST_License.Top := ST_Certificate.Top + ST_Certificate.Height + ScaleX(6);
+    ST_License.Top := ST_Certificate.Top + ST_Certificate.Height + ScaleY(6);
   end
   else
   begin
@@ -177,7 +177,7 @@ begin
    SubKey := 'Environment'
    // Always write Path as REG_EXPAND_SZ, otherwise %{#GamsDirVar}% is not expanded.
    // The user Path can be REG_SZ, unlike the system Path.
-   if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then    RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;')
+   if not RegQueryStringValue(Hive, SubKey, 'Path', PathStr) then RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;')
    else if Pos('%{#GamsDirVar}%', PathStr) = 0 then RegWriteExpandStringValue(Hive, SubKey, 'Path', '%{#GamsDirVar}%;' + PathStr);
 end;
 
@@ -377,7 +377,6 @@ begin
   Result:=True;
   if wpSelectDir = CurPage then
   begin
-    Result := True;
     dir1 := ExpandConstant('{app}');
     dirAnsi := dir1;
     dir2 := dirAnsi;
@@ -392,7 +391,6 @@ begin
   end
   else if wpGamsLicense = CurPage then
   begin
-    Result := True;
     if not ALPSuccess then
     begin
       MsgBox('Please fetch a license by clicking on the "Get License" button first.', mbConfirmation, MB_OK);
@@ -423,8 +421,5 @@ end;
 {initialize the wizard}
 procedure InitializeWizard();
 begin
-  LicenseStr := '';
-  ALPSuccess := False;
-
   wpGamsLicense := CreateLicensePage;
 end;
