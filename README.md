@@ -3,7 +3,8 @@
 This repository builds the Windows installer for **TIMES/GAMS/Veda** (`TIMES_GAMS_Veda-setup.exe`), which bundles:
 
 - a standalone **Python** (downloaded with [uv](https://docs.astral.sh/uv/)),
-- **[GAMSPy](https://github.com/GAMS-dev/gamspy)** with all solvers, installed into that Python. Its `gamspy_base` package provides the GAMS system.
+- **[GAMSPy](https://github.com/GAMS-dev/gamspy)**, installed into that Python,
+- **[GAMS](https://www.gams.com)** with all solvers, provided by GAMSPy's `gamspy_base` package and its solver packages,
 - **[Veda 2.0](https://github.com/kanors-emr/Veda2.0-Installation)**, the localhost edition.
 
 The installer is built by a GitHub Actions workflow and written with [Inno Setup](https://jrsoftware.org/isinfo.php).
