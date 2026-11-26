@@ -14,6 +14,7 @@ The installer is built by a GitHub Actions workflow and written with [Inno Setup
 | Path | Purpose |
 |---|---|
 | `versions.txt` | Version of the installer, and versions of uv, Python, GAMSPy and Veda to build with |
+| `CHANGELOG.md` | Changes per installer version |
 | `.github/workflows/build-installer.yml` | Workflow that builds the installer |
 | `installer/TIMES_GAMS_Veda.iss` | Inno Setup script |
 | `installer/assets/` | Installer icon and wizard images |
