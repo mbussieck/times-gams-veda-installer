@@ -26,8 +26,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 AppName={#MyAppDisplayName}
 AppVerName={#MyAppDisplayName} {#MyAppVersion}
-; TODO: Add AppPublisher. It is shown in the Publisher column of Apps & features and is also
-; used for VersionInfoCompany in the setup file's properties.
+AppPublisher=ETSAP
 ChangesEnvironment=yes
 DefaultDirName=C:\{#MyAppName}
 DefaultGroupName={#MyAppName}
