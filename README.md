@@ -33,11 +33,11 @@ The installer is built by a GitHub Actions workflow and written with [Inno Setup
 
 uv is only used to build the installer and is not bundled.
 
-With `latest`, every build picks up the newest release at that moment. Two builds can therefore differ even without a change in this repository. Use exact versions for reproducible builds.
+With `latest`, every build picks up the newest release at that moment. Two builds can therefore differ even without a change in this repository. Use exact versions for reproducible builds. A release requires exact versions for all components, and the Python version as `X.Y.Z`. The workflow checks this.
 
 ## Building the installer
 
-The workflow only runs when started manually:
+The workflow runs when it is started manually and when a tag `v*` is pushed (see [Releasing](#releasing)). To start a test build:
 
 1. In the repository on GitHub, open the **Actions** tab.
 2. Select **Build Installer** and click **Run workflow**.
@@ -49,10 +49,11 @@ Artifacts are deleted after one day.
 The workflow runs on GitHub's hosted `windows-latest` runner and performs these steps:
 
 1. Reads `versions.txt`, sets up uv, installs the Python version with uv and copies it to `build\python`.
-2. Installs GAMSPy into that Python and runs `gamspy install solver --install-all-solvers`.
+2. Installs GAMSPy into that Python and reads the GAMS version from its `gamspy_base` package. Then runs `gamspy install solver --install-all-solvers`.
 3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`. It reads the TIMES version from `initsys.mod` in the `GAMS_SrcTIMES.<version>` folder of the zip.
 4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the installer version as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.
 5. Uploads `build\installer\TIMES_GAMS_Veda-setup.exe` as an artifact.
+6. For a tag only: creates a GitHub release for the tag with the setup file. The release notes are the section of this version in `CHANGELOG.md`, followed by the bundled TIMES, Veda, GAMS, GAMSPy and Python versions.
 
 ### Building locally
 
@@ -70,6 +71,32 @@ Then compile, passing the installer version from `versions.txt` and the Veda ver
 ```
 
 The script refuses to compile without these two values.
+
+## Releasing
+
+The installer has its own version, independent of the bundled components. It follows [semantic versioning](https://semver.org) `X.Y.Z`:
+
+- Major (`X`): changes that require action from users, for example a different install folder or layout, a removed component, or a Veda or TIMES update that requires migrating user data.
+- Minor (`Y`): updated components (GAMS/GAMSPy, Veda, TIMES, Python) or new installer features.
+- Patch (`Z`): fixes to the installer itself, with the same component versions.
+
+Versions stay at `0.y.z` until the first version that is considered stable for users, which becomes `1.0.0`.
+
+Changes go to `main` through short-lived branches and pull requests. Releases are tagged on `main`. A maintenance branch (for example `0.1.x`) is only created from a release tag if an older release needs a fix after `main` has moved on.
+
+To create a release:
+
+1. In `versions.txt`, set the new `installer` version and exact versions for all components.
+2. Add a section for the new version at the top of `CHANGELOG.md`.
+3. Merge these changes into `main`.
+4. Tag the merge commit on `main` and push the tag, for example:
+
+   ```
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+
+The workflow fails without creating a release if a component version is `latest`, if the Python version is not `X.Y.Z`, if the tag does not match the `installer` version, or if `CHANGELOG.md` has no section for the version.
 
 ## What the installer does
 
