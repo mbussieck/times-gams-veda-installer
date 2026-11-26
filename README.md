@@ -118,3 +118,17 @@ During installation it:
 - Creates a **Veda2.0** shortcut on the desktop of the current user and offers to launch Veda when setup finishes.
 
 The uninstaller removes the installed files, the desktop shortcut, `TIMES_GAMS_VEDA_GAMSDIR` and its `PATH` entry.
+
+## Using the GAMSPy command line
+
+Run the GAMSPy command line with the bundled Python:
+
+```
+"%TIMES_GAMS_VEDA_GAMSDIR%\..\..\..\python.exe" -m gamspy_cli list solvers
+```
+
+To type `gamspy` instead, define a macro for the current command prompt:
+
+```
+doskey gamspy="%TIMES_GAMS_VEDA_GAMSDIR%\..\..\..\python.exe" -m gamspy_cli $*
+```
