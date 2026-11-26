@@ -65,6 +65,7 @@ Source: ..\build\python\*; DestDir: {app}\python; Flags: ignoreversion recursesu
 ; createallsubdirs also creates the empty folders from the Veda zip. Without them, PostgreSQL
 ; fails to start and Veda cannot connect to it.
 Source: ..\build\Veda\*; DestDir: {app}\Veda; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ..\CHANGELOG.md; DestDir: {app}; Flags: ignoreversion
 
 [Icons]
 Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}

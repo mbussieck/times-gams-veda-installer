@@ -107,7 +107,8 @@ Installed layout:
 ```
 <install folder>\
 ├── python\     bundled Python. GAMS is in python\Lib\site-packages\gamspy_base
-└── Veda\       contents of the Veda zip
+├── Veda\       contents of the Veda zip
+└── CHANGELOG.md
 ```
 
 During installation it:
