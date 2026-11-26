@@ -4,7 +4,7 @@ This repository builds the Windows installer for **TIMES/GAMS/Veda** (`TIMES_GAM
 
 - a standalone **Python** (downloaded with [uv](https://docs.astral.sh/uv/)),
 - **[GAMSPy](https://github.com/GAMS-dev/gamspy)**, installed into that Python,
-- **[GAMS](https://www.gams.com)** with all solvers, provided by GAMSPy's `gamspy_base` package and its solver packages,
+- **[GAMS](https://www.gams.com)**, provided by GAMSPy's `gamspy_base` package, with the solvers CBC, CONOPT, COPT, CPLEX, Gurobi, HiGHS, Ipopt, IPOPTH, MINOS, MOSEK, SCIP, SoPlex and Xpress,
 - **[Veda 2.0](https://github.com/kanors-emr/Veda2.0-Installation)**, the localhost edition.
 
 The installer is built by a GitHub Actions workflow and written with [Inno Setup](https://jrsoftware.org/isinfo.php).
@@ -49,7 +49,7 @@ Artifacts are deleted after one day.
 The workflow runs on GitHub's hosted `windows-latest` runner and performs these steps:
 
 1. Reads `versions.txt`, sets up uv, installs the Python version with uv and copies it to `build\python`.
-2. Installs GAMSPy into that Python and reads the GAMS version from its `gamspy_base` package. Then runs `gamspy install solver --install-all-solvers`.
+2. Installs GAMSPy into that Python and reads the GAMS version from its `gamspy_base` package. Then installs the solvers listed above with `gamspy install solver`. CPLEX and CONOPT already come with `gamspy_base`.
 3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`. It reads the TIMES version from `initsys.mod` in the `GAMS_SrcTIMES.<version>` folder of the zip.
 4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the installer version as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.
 5. Uploads `build\installer\TIMES_GAMS_Veda-setup.exe` as an artifact.

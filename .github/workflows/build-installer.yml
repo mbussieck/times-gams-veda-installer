@@ -93,11 +93,14 @@ jobs:
           Write-Host "GAMS version: $gamsVersion"
           "gams=$gamsVersion" >> $env:GITHUB_OUTPUT
 
-      - name: Install all GAMSPy solvers
+      - name: Install GAMSPy solvers
         shell: pwsh
         run: |
+          # CPLEX and CONOPT come with gamspy_base
+          $solvers = "highs", "cbc", "ipopt", "scip", "soplex", "copt", "gurobi", "mosek", "xpress", "minos", "ipopth"
           $gamspy = Join-Path (Split-Path $env:PYTHON) "Scripts\gamspy.exe"
-          & $gamspy install solver --install-all-solvers
+          & $gamspy install solver @solvers
+          if ($LASTEXITCODE -ne 0) { throw "Could not install the solvers" }
 
       - name: Download Veda
         id: veda
