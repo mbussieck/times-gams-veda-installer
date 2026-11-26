@@ -1,0 +1,17 @@
+# Versions used to build the installer. Each is an exact version or "latest".
+# See "Choosing versions" in README.md.
+
+# Version of the installer itself (X.Y.Z, semantic versioning, never "latest")
+installer = 0.1.0
+
+# uv, which downloads Python and installs GAMSPy (e.g. 0.9.5)
+uv = 0.13.10
+
+# Python to bundle; a minor version picks its newest patch release (e.g. 3.14 -> 3.14.2)
+python = 3.15.2
+
+# GAMSPy from PyPI (e.g. 1.18.0)
+gamspy = 1.30.1
+
+# Veda release from kanors-emr/Veda2.0-Installation, without the leading "v" (e.g. 5.0.0.0)
+veda = 5.0.0.0
