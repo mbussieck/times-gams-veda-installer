@@ -1,6 +1,9 @@
 # Versions used to build the installer. Each is an exact version or "latest".
 # See "Choosing versions" in README.md.
 
+# Version of the installer itself (X.Y.Z, semantic versioning, never "latest")
+installer = 0.1.0
+
 # uv, which downloads Python and installs GAMSPy (e.g. 0.9.5)
 uv = latest
 

@@ -13,17 +13,18 @@ The installer is built by a GitHub Actions workflow and written with [Inno Setup
 
 | Path | Purpose |
 |---|---|
-| `versions.txt` | Versions of uv, Python, GAMSPy and Veda to build with |
+| `versions.txt` | Version of the installer, and versions of uv, Python, GAMSPy and Veda to build with |
 | `.github/workflows/build-installer.yml` | Workflow that builds the installer |
 | `installer/TIMES_GAMS_Veda.iss` | Inno Setup script |
 | `installer/assets/` | Installer icon and wizard images |
 
 ## Choosing versions
 
-`versions.txt` contains one `name = version` line per component. Lines starting with `#` are comments. Each version is an exact version or `latest`:
+`versions.txt` contains one `name = version` line per component. Lines starting with `#` are comments. `installer` is the version of the installer itself. Each other version is an exact version or `latest`:
 
 | Name | Allowed values | Examples |
 |---|---|---|
+| `installer` | The installer's own version as `X.Y.Z` | `0.1.0` |
 | `uv` | An exact release from [uv](https://github.com/astral-sh/uv/releases), or `latest` | `0.9.5`, `latest` |
 | `python` | A Python version as understood by uv, or `latest`. A minor version picks its newest patch release. | `3.14`, `3.14.2`, `latest` |
 | `gamspy` | An exact version from [PyPI](https://pypi.org/project/gamspy/), or `latest` | `1.18.0`, `latest` |
@@ -49,7 +50,7 @@ The workflow runs on GitHub's hosted `windows-latest` runner and performs these 
 1. Reads `versions.txt`, sets up uv, installs the Python version with uv and copies it to `build\python`.
 2. Installs GAMSPy into that Python and runs `gamspy install solver --install-all-solvers`.
 3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`. It reads the TIMES version from `initsys.mod` in the `GAMS_SrcTIMES.<version>` folder of the zip.
-4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the TIMES version as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.
+4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the installer version as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.
 5. Uploads `build\installer\TIMES_GAMS_Veda-setup.exe` as an artifact.
 
 ### Building locally
@@ -61,17 +62,17 @@ build\python\   standalone Python with GAMSPy and solvers installed
 build\Veda\     extracted Veda zip
 ```
 
-Then compile, passing the TIMES version of `build\Veda\GAMS_SrcTIMES.<version>` and the Veda version of `build\Veda`:
+Then compile, passing the installer version from `versions.txt` and the Veda version of `build\Veda`:
 
 ```
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=4.9.7 /DVedaVersion=5.0.0.0 installer\TIMES_GAMS_Veda.iss
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.1.0 /DVedaVersion=5.0.0.0 installer\TIMES_GAMS_Veda.iss
 ```
 
 The script refuses to compile without these two values.
 
 ## What the installer does
 
-The installer's version is the TIMES version that comes with Veda, for example `4.9.7`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES/GAMS/Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time. Silent installation (`/SILENT`, `/VERYSILENT`) is not supported, since the license has to be retrieved with an Access Code in the wizard.
+The installer's version is the `installer` version from `versions.txt`, for example `0.1.0`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES/GAMS/Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time. Silent installation (`/SILENT`, `/VERYSILENT`) is not supported, since the license has to be retrieved with an Access Code in the wizard.
 
 Installed layout:
 

@@ -5,10 +5,9 @@
 ; Product name shown in the wizard texts, the window title and Apps & features.
 ; Not valid in file names, so MyAppName is used for those.
 #define MyAppDisplayName="TIMES/GAMS/Veda"
-; The product version is the TIMES version that comes with Veda,
-; passed by the pipeline (ISCC /DMyAppVersion=4.9.7)
+; Installer version from versions.txt, passed by the pipeline (ISCC /DMyAppVersion=0.1.0)
 #ifndef MyAppVersion
-  #error MyAppVersion is not defined. Pass it to the compiler with /DMyAppVersion=<TIMES version>.
+  #error MyAppVersion is not defined. Pass it to the compiler with /DMyAppVersion=<installer version>.
 #endif
 ; GAMS system that comes with GAMSPy in the bundled Python (build\python from the pipeline)
 #define GamsSysDir="{app}\python\Lib\site-packages\gamspy_base"

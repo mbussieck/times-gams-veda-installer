@@ -24,11 +24,12 @@ jobs:
         run: |
           # versions.txt holds one "name = version" line per component, each an exact version or "latest"
           $versions = Get-Content versions.txt -Raw | ConvertFrom-StringData
-          foreach ($name in "uv", "python", "gamspy", "veda") {
+          foreach ($name in "installer", "uv", "python", "gamspy", "veda") {
             if (-not $versions[$name]) { throw "versions.txt has no version for $name" }
             Write-Host "${name}: $($versions[$name])"
             "$name=$($versions[$name])" >> $env:GITHUB_OUTPUT
           }
+          if ($versions["installer"] -notmatch '^\d+\.\d+\.\d+$') { throw "The installer version must be X.Y.Z" }
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v10.3.3
@@ -92,7 +93,7 @@ jobs:
           # The TIMES source folder (e.g. GAMS_SrcTIMES.v4.9.7) comes with Veda
           $src = @(Get-ChildItem build\Veda -Directory -Filter "GAMS_SrcTIMES*")
           if ($src.Count -ne 1) { throw "Expected one GAMS_SrcTIMES* folder in the Veda zip, found $($src.Count)" }
-          # The TIMES version becomes the product version. initsys.mod contains "$TITLE  TIMES -- VERSION 4.9.7"
+          # initsys.mod contains "$TITLE  TIMES -- VERSION 4.9.7"
           $match = Select-String -Path (Join-Path $src[0].FullName initsys.mod) -Pattern 'TIMES -- VERSION\s+(\S+)' | Select-Object -First 1
           if (-not $match) { throw "Could not determine the TIMES version from initsys.mod" }
           $timesVersion = $match.Matches[0].Groups[1].Value
@@ -101,11 +102,13 @@ jobs:
 
       - name: Build installer
         shell: pwsh
+        env:
+          VERSION: ${{ steps.versions.outputs.installer }}
         run: |
           # Inno Setup is preinstalled on the Windows runner images
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { throw "Inno Setup not found at $iscc" }
-          & $iscc "/O$env:GITHUB_WORKSPACE\build\installer" "/DMyAppVersion=$env:TIMES_VERSION" "/DVedaVersion=$env:VEDA_VERSION" installer\TIMES_GAMS_Veda.iss
+          & $iscc "/O$env:GITHUB_WORKSPACE\build\installer" "/DMyAppVersion=$env:VERSION" "/DVedaVersion=$env:VEDA_VERSION" installer\TIMES_GAMS_Veda.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
 
       - name: Upload installer
