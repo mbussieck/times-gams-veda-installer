@@ -10,15 +10,15 @@ This installer has been designed to ease the onboarding process of the ETSAP TIM
 
 ## Installation
 
-This [video](https://github.com/ClemensGAMS/times-gams-veda-installer/blob/main/video.mp4) shows the entire installation process.
+This [video](https://github.com/mbussieck/times-gams-veda-installer/blob/main/video.mp4) shows the entire installation process.
 
-Download the installer from the [latest release](https://github.com/ClemensGAMS/times-gams-veda-installer/releases/latest/download/TIMES_GAMS_Veda-setup.exe).
+Download the installer from the [latest release](https://github.com/mbussieck/times-gams-veda-installer/releases/latest/download/TIMES_GAMS_Veda-setup.exe).
 
 The installer has not been signed, so Windows might warn you with the following pop-up.
 
 <img src="docs/images/dont_run.png" width="450" alt="Windows protected your PC, with the More info link">
 
-You can check the SHA256 checksum to make sure that the installer is genuine. The [release page](https://github.com/ClemensGAMS/times-gams-veda-installer/releases) shows it next to `TIMES_GAMS_Veda-setup.exe` as `sha256:` followed by the checksum. Open a command prompt, navigate to the Downloads folder and run the following command. Compare the printed checksum with the one on the GitHub release page.
+You can check the SHA256 checksum to make sure that the installer is genuine. The [release page](https://github.com/mbussieck/times-gams-veda-installer/releases) shows it next to `TIMES_GAMS_Veda-setup.exe` as `sha256:` followed by the checksum. Open a command prompt, navigate to the Downloads folder and run the following command. Compare the printed checksum with the one on the GitHub release page.
 
 ```
 certutil -hashfile TIMES_GAMS_Veda-setup.exe SHA256
