@@ -34,10 +34,10 @@ If you need to update the GAMS license, have the Access Code of the license read
 "%TIMES_GAMS_VEDA_GAMSDIR%\gamsgetkey" <access-code> -o "%TIMES_GAMS_VEDA_GAMSDIR%\gamslice.txt"
 ```
 
-If you need to install additional solvers, e.g. cuOpt, open a command prompt and run the following command:
+If you need to install additional solvers, e.g. Knitro, open a command prompt and run the following command:
 
 ```
-"%TIMES_GAMS_VEDA_GAMSDIR%\..\..\..\python.exe" -m gamspy_cli install solver cuopt
+"%TIMES_GAMS_VEDA_GAMSDIR%\..\..\..\python.exe" -m gamspy_cli install solver knitro
 ```
 
 Good to know: the installer does not need administrator rights. Installing a new version replaces the one already installed, so only one version is installed at a time. If GAMS is already installed on your computer and is on the system `PATH`, Veda might use that installation instead of the bundled one.
