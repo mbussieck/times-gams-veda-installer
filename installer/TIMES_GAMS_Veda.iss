@@ -5,7 +5,7 @@
 ; Product name shown in the wizard texts, the window title and Apps & features.
 ; Not valid in file names, so MyAppName is used for those.
 #define MyAppDisplayName="TIMES/GAMS/Veda"
-; Installer version from versions.txt, passed by the pipeline (ISCC /DMyAppVersion=0.1.0)
+; Installer version (release date as YY.MM.DD), passed by the pipeline (ISCC /DMyAppVersion=26.12.01)
 #ifndef MyAppVersion
   #error MyAppVersion is not defined. Pass it to the compiler with /DMyAppVersion=<installer version>.
 #endif
