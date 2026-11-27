@@ -2,7 +2,7 @@ name: Build Installer
 
 on:
   workflow_dispatch:
-  # Pushing a tag vX.Y.Z also creates a GitHub release with the installer
+  # Pushing a tag v<release date> (e.g. v26.12.01) also creates a GitHub release with the installer
   push:
     tags: ["v*"]
 
@@ -35,21 +35,36 @@ jobs:
         run: |
           # versions.txt holds one "name = version" line per component, each an exact version or "latest"
           $versions = Get-Content versions.txt -Raw | ConvertFrom-StringData
-          foreach ($name in "installer", "uv", "python", "gamspy", "veda") {
+          foreach ($name in "uv", "python", "gamspy", "veda") {
             if (-not $versions[$name]) { throw "versions.txt has no version for $name" }
             Write-Host "${name}: $($versions[$name])"
             "$name=$($versions[$name])" >> $env:GITHUB_OUTPUT
           }
-          if ($versions["installer"] -notmatch '^\d+\.\d+\.\d+$') { throw "The installer version must be X.Y.Z" }
-          # Releases must be reproducible and match their tag
+          # The installer version is the release date as YY.MM.DD, optionally followed by a counter for
+          # further releases on the same day (e.g. 26.12.01.2). A release takes it from its tag,
+          # a test build gets the build date with counter 0.
+          $today = [datetime]::UtcNow.Date
           if ($env:GITHUB_REF_TYPE -eq "tag") {
+            $installer = $env:GITHUB_REF_NAME.Substring(1)
+            $date = [datetime]::MinValue
+            if ($installer -notmatch '^(\d{2}\.\d{2}\.\d{2})(\.\d+)?$' -or
+                -not [datetime]::TryParseExact($Matches[1], "yy.MM.dd", [Globalization.CultureInfo]::InvariantCulture, "None", [ref]$date)) {
+              throw "Tag $env:GITHUB_REF_NAME must be v followed by a date as YY.MM.DD and an optional counter (e.g. v26.12.01.2)"
+            }
+            # One day of tolerance for time zones ahead of or behind UTC
+            if ([math]::Abs(($date - $today).TotalDays) -gt 1) { throw "Tag $env:GITHUB_REF_NAME is not today's date ($($today.ToString('yy.MM.dd')))" }
+            # Releases must be reproducible
             foreach ($name in "uv", "python", "gamspy", "veda") {
               if ($versions[$name] -eq "latest") { throw "A release needs an exact version for $name in versions.txt" }
             }
             # A minor version like 3.14 would pick whatever patch release is newest
             if ($versions["python"] -notmatch '^\d+\.\d+\.\d+$') { throw "A release needs the Python version as X.Y.Z" }
-            if ($env:GITHUB_REF_NAME -ne "v$($versions["installer"])") { throw "Tag $env:GITHUB_REF_NAME does not match installer version $($versions["installer"])" }
           }
+          else {
+            $installer = $today.ToString("yy.MM.dd") + ".0"
+          }
+          Write-Host "installer: $installer"
+          "installer=$installer" >> $env:GITHUB_OUTPUT
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v10.3.3
@@ -73,6 +88,9 @@ jobs:
           Copy-Item (Split-Path $python) build\python -Recurse
           # The copy is no longer managed by uv; this marker would block installing packages into it
           Remove-Item build\python\Lib\EXTERNALLY-MANAGED
+          # With this marker, uv writes the launchers in Scripts (e.g. gamspy.exe) with a path to
+          # python.exe relative to Scripts instead of the absolute build path. Removed after the last install.
+          Set-Content build\python\pyvenv.cfg "relocatable = true"
           $python = (Resolve-Path build\python\python.exe).Path
           Write-Host "Using $python"
           "PYTHON=$python" >> $env:GITHUB_ENV
@@ -101,6 +119,8 @@ jobs:
           $gamspy = Join-Path (Split-Path $env:PYTHON) "Scripts\gamspy.exe"
           & $gamspy install solver @solvers
           if ($LASTEXITCODE -ne 0) { throw "Could not install the solvers" }
+          # Python would treat its own folder as a virtual environment with this file
+          Remove-Item (Join-Path (Split-Path $env:PYTHON) "pyvenv.cfg")
 
       - name: Download Veda
         id: veda
