@@ -1,3 +1,3 @@
-Unreleased
-==========
+Version 26.11.27
+================
 - First version of the TIMES/GAMS/Veda installer. It bundles a standalone Python with GAMSPy, GAMS with a selection of solvers, and Veda 2.0 (localhost edition).
