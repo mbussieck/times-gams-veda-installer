@@ -73,7 +73,7 @@ Name: {group}\Uninstall {#MyAppName}; Filename: {uninstallexe}
 Name: {autodesktop}\Veda2.0; Filename: {#VedaDir}\Veda2.0.exe
 
 [Run]
-Filename: {#VedaDir}\Veda2.0.exe; Description: Launch Veda2.0; Flags: nowait postinstall
+Filename: {win}\explorer.exe; Parameters: """{#VedaDir}\Veda2.0.exe"""; Description: Launch Veda2.0; Flags: nowait postinstall
 
 [Registry]
 ; User environment variable that points to the GAMS system. The uninstaller deletes it.
