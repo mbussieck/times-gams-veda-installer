@@ -1,18 +1,55 @@
 # TIMES/GAMS/Veda installer
 
-This repository builds the Windows installer for **TIMES/GAMS/Veda** (`TIMES_GAMS_Veda-setup.exe`), which bundles:
+This repository builds and provides the Windows installer for **TIMES/GAMS/Veda** (`TIMES_GAMS_Veda-setup.exe`), which bundles:
 
-- a standalone **Python** (downloaded with [uv](https://docs.astral.sh/uv/)),
-- **[GAMSPy](https://github.com/GAMS-dev/gamspy)**, installed into that Python,
-- **[GAMS](https://www.gams.com)**, provided by GAMSPy's `gamspy_base` package, with the solvers CBC, CONOPT, COPT, CPLEX, Gurobi, HiGHS, Ipopt, IPOPTH, MINOS, MOSEK, SCIP, SoPlex and Xpress,
-- **[Veda 2.0](https://github.com/kanors-emr/Veda2.0-Installation)**, the localhost edition.
+- [**GAMS**](https://www.gams.com) with the solvers CBC, CONOPT, COPT, CPLEX, Gurobi, HiGHS, Ipopt, IPOPTH, MINOS, MOSEK, SCIP, SoPlex and Xpress,  
+- [**Veda 2.0**](https://github.com/kanors-emr/Veda2.0-Installation), the localhost edition.  
+- a standalone **Python** (downloaded with [uv](https://docs.astral.sh/uv/)) with the [**GAMSPy**](https://github.com/GAMS-dev/gamspy) package
+
+This installer has been designed to ease the onboarding process of the ETSAP TIMES model. It includes all parts to run the [demonstration and starter models](https://iea-etsap.org/demonstration-and-starter-models/). As part of the installation, the user needs to enter an access code of a GAMS license. A free personal GAMS license can be created in a few minutes from the [GAMS portal](https://portal.gams.com/). For anything beyond a free personal license, complete the request from the ETSAP web page [Getting started with TIMES modelling](https://iea-etsap.org/getting-started-withtimes-modelling/).
+
+This [video](https://github.com/ClemensGAMS/times-gams-veda-installer/blob/main/video.mp4t) shows the entire installation process.
+
+Download the installer from the [latest release](https://github.com/ClemensGAMS/times-gams-veda-installer/releases/latest/download/TIMES_GAMS_Veda-setup.exe).
+
+The installer has not been signed, so Windows might warn you with the following pop-up.
+
+\<pic: dont\_run.png\>
+
+You can check the sha256 checksum on the [release page](https://github.com/ClemensGAMS/times-gams-veda-installer/releases) to make sure that the installer is genuine. Open a cmd prompt, navigate to the Downloads folder and run the following command. Compare the hash printed with the one from the github release page.
+
+```
+certutil -hashfile TIMES_GAMS_Veda-setup.exe SHA256
+```
+
+If the two checksums match, click on “More info” and then on “Run anyway”:
+
+\<pic: run\_anyway.png\>
+
+If you need to update the GAMS license, have the access code of the license ready and open a cmd prompt and run the following command, replacing `<access-code>` with your own access code:
+
+```
+"%TIMES_GAMS_VEDA_GAMSDIR%\gamsgetkey" <access-code> -o "%TIMES_GAMS_VEDA_GAMSDIR%\gamslice.txt"
+```
+
+If you need to install additional solvers, e.g. cuOpt, open a cmd prompt and run the following command:
+
+```
+"%TIMES_GAMS_VEDA_GAMSDIR%\..\..\..\python.exe" -m gamspy_cli install solver cuopt
+```
+
+Good to know: the installer does not need administrator rights. Installing a new version replaces the one already installed, so only one version is installed at a time. If GAMS is already installed on your computer and is on the system PATH, VEDA might use that installation instead of the bundled one.
+
+After the installation, start Veda with the Veda2.0 shortcut on your desktop. To uninstall, use Installed apps in the Windows Settings, as for any other program.
+
+The remainder of this document explains the technical details of the installer and can be skipped by those who want to use, not build, the installer.
 
 The installer is built by a GitHub Actions workflow and written with [Inno Setup](https://jrsoftware.org/isinfo.php).
 
 ## Repository layout
 
 | Path | Purpose |
-|---|---|
+| :---- | :---- |
 | `versions.txt` | Version of the installer, and versions of uv, Python, GAMSPy and Veda to build with |
 | `CHANGELOG.md` | Changes per installer version |
 | `.github/workflows/build-installer.yml` | Workflow that builds the installer |
@@ -24,8 +61,8 @@ The installer is built by a GitHub Actions workflow and written with [Inno Setup
 `versions.txt` contains one `name = version` line per component. Lines starting with `#` are comments. `installer` is the version of the installer itself. Each other version is an exact version or `latest`:
 
 | Name | Allowed values | Examples |
-|---|---|---|
-| `installer` | The installer's own version as `X.Y.Z` | `0.1.0` |
+| :---- | :---- | :---- |
+| `installer` | The installer's release date as `YY.MM.DD` | `26.12.01` |
 | `uv` | An exact release from [uv](https://github.com/astral-sh/uv/releases), or `latest` | `0.9.5`, `latest` |
 | `python` | A Python version as understood by uv, or `latest`. A minor version picks its newest patch release. | `3.14`, `3.14.2`, `latest` |
 | `gamspy` | An exact version from [PyPI](https://pypi.org/project/gamspy/), or `latest` | `1.18.0`, `latest` |
@@ -39,20 +76,20 @@ With `latest`, every build picks up the newest release at that moment. Two build
 
 The workflow runs when it is started manually and when a tag `v*` is pushed (see [Releasing](#releasing)). To start a test build:
 
-1. In the repository on GitHub, open the **Actions** tab.
-2. Select **Build Installer** and click **Run workflow**.
-3. Under **Use workflow from**, choose the branch to build, then click **Run workflow**.
-4. When the run has finished, download **TIMES_GAMS_Veda-setup** from the **Artifacts** section of the run's summary page.
+1. In the repository on GitHub, open the **Actions** tab.  
+2. Select **Build Installer** and click **Run workflow**.  
+3. Under **Use workflow from**, choose the branch to build, then click **Run workflow**.  
+4. When the run has finished, download **TIMES\_GAMS\_Veda-setup** from the **Artifacts** section of the run's summary page.
 
 Artifacts are deleted after one day.
 
 The workflow runs on GitHub's hosted `windows-latest` runner and performs these steps:
 
-1. Reads `versions.txt`, sets up uv, installs the Python version with uv and copies it to `build\python`.
-2. Installs GAMSPy into that Python and reads the GAMS version from its `gamspy_base` package. Then installs the solvers listed above with `gamspy install solver`. CPLEX and CONOPT already come with `gamspy_base`.
-3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`. It reads the TIMES version from `initsys.mod` in the `GAMS_SrcTIMES.<version>` folder of the zip.
-4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the installer version as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.
-5. Uploads `build\installer\TIMES_GAMS_Veda-setup.exe` as an artifact.
+1. Reads `versions.txt`, sets up uv, installs the Python version with uv and copies it to `build\python`.  
+2. Installs GAMSPy into that Python and reads the GAMS version from its `gamspy_base` package. Then installs the solvers listed above with `gamspy install solver`. CPLEX and CONOPT already come with `gamspy_base`.  
+3. Downloads `Veda2.0_localhost_<version>.zip` and extracts it to `build\Veda`. It reads the TIMES version from `initsys.mod` in the `GAMS_SrcTIMES.<version>` folder of the zip.  
+4. Compiles `installer\TIMES_GAMS_Veda.iss` with the preinstalled Inno Setup. It passes the installer version as `/DMyAppVersion=<version>` and the resolved Veda version as `/DVedaVersion=<version>`.  
+5. Uploads `build\installer\TIMES_GAMS_Veda-setup.exe` as an artifact.  
 6. For a tag only: creates a GitHub release for the tag with the setup file. The release notes are the section of this version in `CHANGELOG.md`, followed by the bundled TIMES, Veda, GAMS, GAMSPy and Python versions.
 
 ### Building locally
@@ -67,40 +104,39 @@ build\Veda\     extracted Veda zip
 Then compile, passing the installer version from `versions.txt` and the Veda version of `build\Veda`:
 
 ```
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=0.1.0 /DVedaVersion=5.0.0.0 installer\TIMES_GAMS_Veda.iss
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=26.12.01 /DVedaVersion=5.0.0.0 installer\TIMES_GAMS_Veda.iss
 ```
 
 The script refuses to compile without these two values.
 
 ## Releasing
 
-The installer has its own version, independent of the bundled components. It follows [semantic versioning](https://semver.org) `X.Y.Z`:
+The installer has its own version, independent of the bundled components. Its version number is the release date as YY.MM.DD, for example 26.12.01 for a release on 1 December 2026\. The versions of the bundled components are listed in the release notes and in CHANGELOG.md. For a second release on the same day, append a counter, for example 26.12.01.2.
 
-- Major (`X`): changes that require action from users, for example a different install folder or layout, a removed component, or a Veda or TIMES update that requires migrating user data.
-- Minor (`Y`): updated components (GAMS/GAMSPy, Veda, TIMES, Python) or new installer features.
-- Patch (`Z`): fixes to the installer itself, with the same component versions.
+Changes that require action from users, for example a different install folder or layout, a removed component, or a Veda or TIMES update that requires migrating user data, are stated at the top of the version's section in CHANGELOG.md and in the release notes.
 
-Versions stay at `0.y.z` until the first version that is considered stable for users, which becomes `1.0.0`.
-
-Changes go to `main` through short-lived branches and pull requests. Releases are tagged on `main`. A maintenance branch (for example `0.1.x`) is only created from a release tag if an older release needs a fix after `main` has moved on.
+Changes go to `main` through short-lived branches and pull requests. Releases are tagged on `main`. A maintenance branch (for example `release-26.12.01`) is only created from a release tag if an older release needs a fix after `main` has moved on.
 
 To create a release:
 
-1. In `versions.txt`, set the new `installer` version and exact versions for all components.
+1. In `versions.txt`, set the new `installer` version (the release date as YY.MM.DD) and exact versions for all components.
+
 2. Add a section for the new version at the top of `CHANGELOG.md`.
+
 3. Merge these changes into `main`.
+
 4. Tag the merge commit on `main` and push the tag, for example:
 
-   ```
-   git tag v0.1.0
-   git push origin v0.1.0
-   ```
+```
+git tag v26.12.01
+git push origin v26.12.01
+```
 
-The workflow fails without creating a release if a component version is `latest`, if the Python version is not `X.Y.Z`, if the tag does not match the `installer` version, or if `CHANGELOG.md` has no section for the version.
+The workflow fails without creating a release if a component version is `latest`, if the Python version is not `X.Y.Z`, if the installer version is not a date as YY.MM.DD, if the tag does not match the `installer` version, or if `CHANGELOG.md` has no section for the version.
 
 ## What the installer does
 
-The installer's version is the `installer` version from `versions.txt`, for example `0.1.0`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES/GAMS/Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time. Silent installation (`/SILENT`, `/VERYSILENT`) is not supported, since the license has to be retrieved with an Access Code in the wizard.
+The installer's version is the `installer` version from `versions.txt`, for example `26.12.01`. The installer installs for the current user and does not require administrator rights. The default target folder is `C:\TIMES_GAMS_Veda`. If TIMES/GAMS/Veda is already installed, any version installs into that folder without asking, so only one version can be installed at a time. Silent installation (`/SILENT`, `/VERYSILENT`) is not supported, since the license has to be retrieved with an Access Code in the wizard.
 
 Installed layout:
 
@@ -113,8 +149,8 @@ Installed layout:
 
 During installation it:
 
-- Asks for a GAMS Access Code and retrieves a license with `gamsgetkey`. The license is written to `gamspy_base\gamslice.txt` and replaces the demo license that ships with GAMSPy.
-- Sets the user environment variable `TIMES_GAMS_VEDA_GAMSDIR` to the `gamspy_base` folder. It also adds `%TIMES_GAMS_VEDA_GAMSDIR%` to the front of the user `PATH`. Windows appends the user `PATH` to the system `PATH`, so a GAMS on the system `PATH` takes precedence. The installer uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.
+- Asks for a GAMS Access Code and retrieves a license with `gamsgetkey`. The license is written to `gamspy_base\gamslice.txt` and replaces the demo license that ships with GAMSPy.  
+- Sets the user environment variable `TIMES_GAMS_VEDA_GAMSDIR` to the `gamspy_base` folder. It also adds `%TIMES_GAMS_VEDA_GAMSDIR%` to the front of the user `PATH`. Windows appends the user `PATH` to the system `PATH`, so a GAMS on the system `PATH` takes precedence. The installer uses its own variable so that the `GAMSDIR` of a regular GAMS installation stays untouched.  
 - Creates a **Veda2.0** shortcut on the desktop of the current user and offers to launch Veda when setup finishes.
 
 The uninstaller removes the installed files, the desktop shortcut, `TIMES_GAMS_VEDA_GAMSDIR` and its `PATH` entry.
@@ -132,3 +168,4 @@ To type `gamspy` instead, define a macro for the current command prompt:
 ```
 doskey gamspy="%TIMES_GAMS_VEDA_GAMSDIR%\..\..\..\python.exe" -m gamspy_cli $*
 ```
+
