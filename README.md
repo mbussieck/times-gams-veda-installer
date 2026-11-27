@@ -14,7 +14,7 @@ Download the installer from the [latest release](https://github.com/ClemensGAMS/
 
 The installer has not been signed, so Windows might warn you with the following pop-up.
 
-\<pic: dont\_run.png\>
+<img src="docs/images/dont_run.png" width="450" alt="Windows protected your PC, with the More info link">
 
 You can check the sha256 checksum on the [release page](https://github.com/ClemensGAMS/times-gams-veda-installer/releases) to make sure that the installer is genuine. Open a cmd prompt, navigate to the Downloads folder and run the following command. Compare the hash printed with the one from the github release page.
 
@@ -24,7 +24,7 @@ certutil -hashfile TIMES_GAMS_Veda-setup.exe SHA256
 
 If the two checksums match, click on “More info” and then on “Run anyway”:
 
-\<pic: run\_anyway.png\>
+<img src="docs/images/run_anyway.png" width="450" alt="Windows protected your PC, with the Run anyway button">
 
 If you need to update the GAMS license, have the access code of the license ready and open a cmd prompt and run the following command, replacing `<access-code>` with your own access code:
 
@@ -55,6 +55,7 @@ The installer is built by a GitHub Actions workflow and written with [Inno Setup
 | `.github/workflows/build-installer.yml` | Workflow that builds the installer |
 | `installer/TIMES_GAMS_Veda.iss` | Inno Setup script |
 | `installer/assets/` | Installer icon and wizard images |
+| `docs/images/` | Images used in this README |
 
 ## Choosing versions
 
