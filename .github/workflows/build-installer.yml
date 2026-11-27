@@ -73,6 +73,9 @@ jobs:
           Copy-Item (Split-Path $python) build\python -Recurse
           # The copy is no longer managed by uv; this marker would block installing packages into it
           Remove-Item build\python\Lib\EXTERNALLY-MANAGED
+          # With this marker, uv writes the launchers in Scripts (e.g. gamspy.exe) with a path to
+          # python.exe relative to Scripts instead of the absolute build path. Removed after the last install.
+          Set-Content build\python\pyvenv.cfg "relocatable = true"
           $python = (Resolve-Path build\python\python.exe).Path
           Write-Host "Using $python"
           "PYTHON=$python" >> $env:GITHUB_ENV
@@ -101,6 +104,8 @@ jobs:
           $gamspy = Join-Path (Split-Path $env:PYTHON) "Scripts\gamspy.exe"
           & $gamspy install solver @solvers
           if ($LASTEXITCODE -ne 0) { throw "Could not install the solvers" }
+          # Python would treat its own folder as a virtual environment with this file
+          Remove-Item (Join-Path (Split-Path $env:PYTHON) "pyvenv.cfg")
 
       - name: Download Veda
         id: veda
