@@ -123,13 +123,11 @@ Changes go to `main` through short-lived branches and pull requests. Releases ar
 
 To create a release:
 
-1. In `versions.txt`, set exact versions for all components.
+1. While working on the next release, set exact versions for all components in `versions.txt` and describe the changes in a section `Unreleased` at the top of `CHANGELOG.md`. The release date is not known yet, so this section has no version.
 
-2. Add a section for the new version (the planned release date, for example `Version 26.12.01`) at the top of `CHANGELOG.md`.
+2. On the release day, rename the section `Unreleased` to `Version` followed by the release date, for example `Version 26.12.01`, and merge this change into `main`.
 
-3. Merge these changes into `main`.
-
-4. On the release date, tag the merge commit on `main` and push the tag. The tag name is `v` followed by the version, and the workflow takes the installer version from it. For example, tag `v26.12.01` gives version `26.12.01`:
+3. Tag the merge commit on `main` and push the tag. The tag name is `v` followed by the version, and the workflow takes the installer version from it. For example, tag `v26.12.01` gives version `26.12.01`:
 
    ```
    git tag v26.12.01
